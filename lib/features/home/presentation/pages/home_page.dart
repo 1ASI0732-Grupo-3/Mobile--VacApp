@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     // Espacio para el header flotante
-                    const SizedBox(height: 90),
+                    const SizedBox(height: 130),
                     
                     // Widget de estadísticas
                     const StatisticsWidget(),
