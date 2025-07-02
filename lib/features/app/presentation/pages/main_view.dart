@@ -168,35 +168,58 @@ class _MainViewState extends State<MainView> {
               child: bodyKeyed,
             ),
 
-            /// ⬇️ Menú de navegación flotante con estilo isla
+            /// ⬇️ Menú de navegación flotante con estilo futurista
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
+                    // Fondo futurista con gradiente verde claro
                     gradient: LinearGradient(
-                      colors: [primary, primary.withOpacity(0.9)],
+                      colors: [
+                        Colors.white.withOpacity(0.95),
+                        lightGreen.withOpacity(0.9),
+                        const Color(0xFFE0F2F1).withOpacity(0.95), // Verde mint claro
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(40),
+                    borderRadius: BorderRadius.circular(50),
+                    // Efectos de sombra futuristas en verde
                     boxShadow: [
+                      // Sombra principal con efecto de levitación verde
                       BoxShadow(
                         color: primary.withOpacity(0.3),
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
+                        spreadRadius: 5,
+                      ),
+                      // Resplandor neon verde
+                      BoxShadow(
+                        color: const Color(0xFF4CAF50).withOpacity(0.6),
                         blurRadius: 15,
+                        offset: const Offset(0, 0),
+                        spreadRadius: 2,
+                      ),
+                      // Sombra secundaria verde suave
+                      BoxShadow(
+                        color: const Color(0xFF81C784).withOpacity(0.2),
+                        blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
+                      // Sombra profunda para separación
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        blurRadius: 25,
+                        offset: const Offset(0, 10),
                       ),
                     ],
+                    // Borde futurista verde
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 1,
+                      color: primary.withOpacity(0.4),
+                      width: 2.0,
                     ),
                   ),
                   child: Row(
@@ -212,35 +235,65 @@ class _MainViewState extends State<MainView> {
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.white : Colors.transparent,
-                            borderRadius: BorderRadius.circular(30),
+                            // Fondo futurista verde para ítem seleccionado
+                            gradient: isSelected ? LinearGradient(
+                              colors: [
+                                const Color(0xFF4CAF50), // Verde vibrante
+                                primary, // Verde principal de la app
+                                const Color(0xFF2E7D32), // Verde más oscuro
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ) : null,
+                            color: !isSelected ? Colors.transparent : null,
+                            borderRadius: BorderRadius.circular(35),
+                            // Efectos de resplandor verde para ítem seleccionado
                             boxShadow: isSelected ? [
                               BoxShadow(
-                                color: Colors.white.withOpacity(0.3),
+                                color: const Color(0xFF4CAF50).withOpacity(0.5),
+                                blurRadius: 15,
+                                offset: const Offset(0, 0),
+                                spreadRadius: 2,
+                              ),
+                              BoxShadow(
+                                color: primary.withOpacity(0.3),
                                 blurRadius: 8,
-                                offset: const Offset(0, 2),
+                                offset: const Offset(0, 4),
                               ),
                             ] : null,
+                            // Borde con resplandor verde claro
+                            border: isSelected ? Border.all(
+                              color: lightGreen.withOpacity(0.8),
+                              width: 1.5,
+                            ) : null,
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 _menuItems[index]['icon'],
-                                color: isSelected ? primary : Colors.white,
-                                size: isSelected ? 24 : 22,
+                                color: isSelected ? Colors.white : primary.withOpacity(0.8),
+                                size: isSelected ? 26 : 24,
                               ),
                               if (isSelected)
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsets.only(left: 8),
                                   child: Text(
                                     _menuItems[index]['label'],
                                     style: const TextStyle(
-                                      color: primary,
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: 15,
+                                      letterSpacing: 0.5,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black26,
+                                          offset: Offset(0, 1),
+                                          blurRadius: 2,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 )
