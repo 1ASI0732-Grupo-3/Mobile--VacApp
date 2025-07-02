@@ -1021,10 +1021,82 @@ class CampaignCard extends StatelessWidget {
     );
   }
 
-  /// Shows dialog to add a new goal
+  /// Shows step-by-step dialog to add a new goal with bovine-specific metrics
   void _showAddGoalDialog(BuildContext context) {
+    _showGoalStep1MetricSelection(context);
+  }
+
+  /// Step 1: Select metric for bovines
+  void _showGoalStep1MetricSelection(BuildContext context) {
     const primary = Color(0xFF00695C);
-    final TextEditingController goalController = TextEditingController();
+    
+    // Métricas específicas para bovinos
+    final List<Map<String, dynamic>> bovineMetrics = [
+      {
+        'name': 'Vacunación',
+        'icon': Icons.medical_services,
+        'color': Colors.green,
+        'description': 'Aplicar vacunas preventivas al ganado bovino',
+        'unit': 'animales',
+        'examples': ['Fiebre aftosa', 'Brucelosis', 'Carbón sintomático']
+      },
+      {
+        'name': 'Desparasitación',
+        'icon': Icons.pest_control,
+        'color': Colors.orange,
+        'description': 'Eliminar parásitos internos y externos',
+        'unit': 'animales',
+        'examples': ['Garrapatas', 'Lombrices', 'Ácaros']
+      },
+      {
+        'name': 'Control de peso',
+        'icon': Icons.monitor_weight,
+        'color': Colors.blue,
+        'description': 'Monitorear y registrar el peso del ganado',
+        'unit': 'kg promedio',
+        'examples': ['Peso promedio', 'Ganancia de peso']
+      },
+      {
+        'name': 'Vitaminas y suplementos',
+        'icon': Icons.local_pharmacy,
+        'color': Colors.purple,
+        'description': 'Administrar vitaminas y minerales',
+        'unit': 'animales',
+        'examples': ['Vitamina A, D, E', 'Calcio', 'Fósforo']
+      },
+      {
+        'name': 'Inseminación artificial',
+        'icon': Icons.science,
+        'color': Colors.pink,
+        'description': 'Reproducción asistida del ganado',
+        'unit': 'vacas',
+        'examples': ['Mejora genética', 'Control reproductivo']
+      },
+      {
+        'name': 'Ordeño',
+        'icon': Icons.agriculture,
+        'color': Colors.brown,
+        'description': 'Producción y calidad de leche',
+        'unit': 'litros/vaca/día',
+        'examples': ['Litros por vaca', 'Calidad de leche']
+      },
+      {
+        'name': 'Alimentación',
+        'icon': Icons.grass,
+        'color': Colors.lightGreen,
+        'description': 'Nutrición y dieta del ganado',
+        'unit': 'kg/animal/día',
+        'examples': ['Forraje', 'Concentrados', 'Pastos']
+      },
+      {
+        'name': 'Revisión veterinaria',
+        'icon': Icons.healing,
+        'color': Colors.red,
+        'description': 'Chequeos médicos y diagnósticos',
+        'unit': 'animales',
+        'examples': ['Examen general', 'Análisis', 'Tratamientos']
+      },
+    ];
     
     showDialog(
       context: context,
@@ -1040,7 +1112,6 @@ class CampaignCard extends StatelessWidget {
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.8,
             ),
-            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -1052,38 +1123,70 @@ class CampaignCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header con ícono
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header con progreso
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [primary, primary.withOpacity(0.8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: Icon(
-                      Icons.flag_outlined,
-                      size: 32,
-                      color: primary,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Título
-                  const Text(
-                    'Agregar Objetivo',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  
-                  // Descripción del objetivo
-                  Container(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.flag_outlined,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Agregar Objetivo',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Paso 1 de 2 - Selecciona el tipo',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Descripción
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -1101,21 +1204,19 @@ class CampaignCard extends StatelessWidget {
                               color: primary,
                             ),
                             const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                '¿Qué es un objetivo?',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: primary,
-                                ),
+                            Text(
+                              'Objetivos para el bovino',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: primary,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Un objetivo es una meta específica que deseas lograr con esta campaña. Por ejemplo: "Vacunar 100 animales", "Desparasitar el ganado", "Aplicar vitaminas a las vacas lecheras".',
+                          'Selecciona el tipo de objetivo específico para tu ganado bovino. Cada opción tiene métricas adaptadas a las actividades ganaderas.',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade700,
@@ -1125,208 +1226,514 @@ class CampaignCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  
-                  // Información de la campaña
+                ),
+                
+                // Lista de métricas bovinas
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ListView.builder(
+                      itemCount: bovineMetrics.length,
+                      itemBuilder: (context, index) {
+                        final metric = bovineMetrics[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                _showGoalStep2ValueInput(context, metric);
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: (metric['color'] as Color).withOpacity(0.3),
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: (metric['color'] as Color).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        metric['icon'] as IconData,
+                                        color: metric['color'] as Color,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            metric['name'] as String,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            metric['description'] as String,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Medida: ${metric['unit']}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: (metric['color'] as Color),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                
+                // Botón de cancelar
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, size: 18),
+                      label: const Text('Cancelar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey.shade600,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Step 2: Input goal value and details
+  void _showGoalStep2ValueInput(BuildContext context, Map<String, dynamic> selectedMetric) {
+    const primary = Color(0xFF00695C);
+    final TextEditingController targetValueController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
+    
+    // Valores sugeridos basados en el tipo de métrica
+    List<String> quickValues = [];
+    String unit = selectedMetric['unit'] as String;
+    
+    switch (selectedMetric['name']) {
+      case 'Vacunación':
+        quickValues = ['25', '50', '100', '200'];
+        break;
+      case 'Desparasitación':
+        quickValues = ['20', '40', '80', '150'];
+        break;
+      case 'Control de peso':
+        quickValues = ['400', '500', '600', '700'];
+        break;
+      case 'Vitaminas y suplementos':
+        quickValues = ['15', '30', '60', '120'];
+        break;
+      case 'Inseminación artificial':
+        quickValues = ['5', '10', '20', '40'];
+        break;
+      case 'Ordeño':
+        quickValues = ['15', '20', '25', '30'];
+        break;
+      case 'Alimentación':
+        quickValues = ['5', '8', '12', '15'];
+        break;
+      case 'Revisión veterinaria':
+        quickValues = ['10', '25', '50', '100'];
+        break;
+      default:
+        quickValues = ['10', '25', '50', '100'];
+    }
+    
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header con progreso
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      gradient: LinearGradient(
+                        colors: [primary, primary.withOpacity(0.8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
                     ),
-                    child: Column(
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.campaign,
-                              size: 20,
-                              color: primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                campaign.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.flag,
-                              size: 16,
-                              color: primary.withOpacity(0.7),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Objetivos actuales: ${campaign.goals.length}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Campo de texto para el objetivo
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primary.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: goalController,
-                      maxLines: 3,
-                      maxLength: 200,
-                      decoration: InputDecoration(
-                        labelText: 'Mensaje del objetivo',
-                        hintText: 'Ej: Vacunar 100 animales del establo contra la fiebre aftosa',
-                        helperText: 'Describe el objetivo',
-                        prefixIcon: Container(
-                          margin: const EdgeInsets.all(12),
-                          padding: const EdgeInsets.all(8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            Icons.flag_outlined,
-                            color: primary,
-                            size: 20,
+                            selectedMetric['icon'] as IconData,
+                            color: Colors.white,
+                            size: 24,
                           ),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Agregar Objetivo',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Paso 2 de 2 - ${selectedMetric['name']}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: primary, width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
                   
-                  // Botones de acción
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, size: 18),
-                          label: const Text('Cancelar'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey.shade600,
-                            side: BorderSide(color: Colors.grey.shade300),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        // Métrica seleccionada
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: (selectedMetric['color'] as Color).withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: (selectedMetric['color'] as Color).withOpacity(0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: selectedMetric['color'] as Color,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Objetivo seleccionado:',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    Text(
+                                      selectedMetric['name'] as String,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: (selectedMetric['color'] as Color),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _showGoalStep1MetricSelection(context);
+                                },
+                                child: const Text('Cambiar'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Meta objetivo
+                        TextField(
+                          controller: targetValueController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Meta objetivo *',
+                            hintText: 'Ej: 100',
+                            helperText: 'Cantidad a lograr ($unit)',
+                            prefixIcon: Container(
+                              margin: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.track_changes,
+                                color: primary,
+                                size: 20,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: primary, width: 2),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            if (goalController.text.trim().isNotEmpty) {
-                              // Crear el payload según la API: description, metric, targetValue, currentValue
-                              final goalData = {
-                                'description': goalController.text.trim(),
-                                'metric': 'unidad',      // valor por defecto
-                                'targetValue': 1,        // valor por defecto
-                                'currentValue': 0,       // valor por defecto
-                              };
-
-                              print('✅ [DEBUG] Enviando goal con payload exacto de la API: $goalData');
-                              print('✅ [DEBUG] Para campaña ID: ${campaign.id}');
-                              
-                              Navigator.pop(context);
-                              
-                              // Usar la función callback para agregar el goal con los datos
-                              onAddGoal(campaign, goalData);
-                              
-                              // Show success message at the top
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.check_circle,
-                                        color: Colors.white,
-                                        size: 20,
+                        const SizedBox(height: 16),
+                        
+                        // Valores rápidos
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Valores sugeridos ($unit):',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: quickValues.map((value) {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      targetValueController.text = value;
+                                    },
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
                                       ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text('Objetivo agregado correctamente'),
+                                      decoration: BoxDecoration(
+                                        color: primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: primary.withOpacity(0.3),
+                                        ),
                                       ),
-                                    ],
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          color: primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  backgroundColor: primary,
-                                  behavior: SnackBarBehavior.floating,
-                                  margin: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context).size.height - 100,
-                                    left: 20,
-                                    right: 20,
-                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Descripción opcional
+                        TextField(
+                          controller: descriptionController,
+                          maxLines: 3,
+                          maxLength: 200,
+                          decoration: InputDecoration(
+                            labelText: 'Descripción adicional (opcional)',
+                            hintText: 'Ej: Aplicar vacuna contra fiebre aftosa en todas las vacas lecheras',
+                            helperText: 'Detalles específicos del objetivo',
+                            prefixIcon: Container(
+                              margin: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.description,
+                                color: primary,
+                                size: 20,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: primary, width: 2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        // Botones de acción
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _showGoalStep1MetricSelection(context);
+                                },
+                                icon: const Icon(Icons.arrow_back, size: 18),
+                                label: const Text('Atrás'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.grey.shade600,
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  duration: const Duration(seconds: 3),
                                 ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Por favor, ingresa una descripción para el objetivo'),
-                                  backgroundColor: Colors.red,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Agregar Objetivo'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  if (targetValueController.text.trim().isNotEmpty) {
+                                    final goalData = {
+                                      'description': descriptionController.text.trim().isNotEmpty 
+                                          ? descriptionController.text.trim()
+                                          : '${selectedMetric['name']}: ${targetValueController.text} $unit',
+                                      'metric': selectedMetric['name'],
+                                      'targetValue': int.tryParse(targetValueController.text.trim()) ?? 1,
+                                      'currentValue': 0,
+                                    };
+
+                                    print('✅ [DEBUG] Enviando goal con payload: $goalData');
+                                    print('✅ [DEBUG] Para campaña ID: ${campaign.id}');
+                                    
+                                    Navigator.pop(context);
+                                    
+                                    onAddGoal(campaign, goalData);
+                                    
+                                    // Show success message at the top
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.check_circle,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text('Objetivo "${selectedMetric['name']}" agregado correctamente'),
+                                            ),
+                                          ],
+                                        ),
+                                        backgroundColor: primary,
+                                        behavior: SnackBarBehavior.fixed,
+                                        duration: const Duration(seconds: 3),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Por favor, ingresa la meta objetivo'),
+                                        backgroundColor: Colors.red,
+                                        behavior: SnackBarBehavior.fixed,
+                                      ),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.add, size: 18),
+                                label: const Text('Agregar Objetivo'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primary,
+                                  foregroundColor: Colors.white,
+                                  elevation: 2,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -1938,15 +2345,7 @@ class CampaignCard extends StatelessWidget {
                                         ],
                                       ),
                                       backgroundColor: Colors.blue,
-                                      behavior: SnackBarBehavior.floating,
-                                      margin: EdgeInsets.only(
-                                        bottom: MediaQuery.of(context).size.height - 100,
-                                        left: 20,
-                                        right: 20,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
+                                      behavior: SnackBarBehavior.fixed,
                                       duration: const Duration(seconds: 3),
                                     ),
                                   );
@@ -1955,7 +2354,7 @@ class CampaignCard extends StatelessWidget {
                                     const SnackBar(
                                       content: Text('Por favor, agrega los detalles del canal'),
                                       backgroundColor: Colors.red,
-                                      behavior: SnackBarBehavior.floating,
+                                      behavior: SnackBarBehavior.fixed,
                                     ),
                                   );
                                 }
@@ -2058,168 +2457,428 @@ class CampaignCard extends StatelessWidget {
   void _showGoalsList(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           child: Container(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.7,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: MediaQuery.of(context).size.width * 0.92,
             ),
-            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, 15),
+                ),
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header
-                Row(
-                  children: [
-                    Icon(
-                      Icons.flag_outlined,
-                      color: Colors.green,
-                      size: 24,
+                // Header moderno con gradiente
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.green.shade50,
+                        Colors.green.shade100.withOpacity(0.7),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Objetivos de la Campaña',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.flag,
+                          color: Colors.green,
+                          size: 28,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                
-                // Lista de objectives
-                Expanded(
-                  child: FutureBuilder<List<Map<String, dynamic>>>(
-                    future: CampaignServices().getCampaignGoals(campaign.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Text(
-                            'Error al cargar objetivos: ${snapshot.error}',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        );
-                      }
-                      
-                      final goals = snapshot.data ?? [];
-                      
-                      if (goals.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.flag_outlined,
-                                size: 48,
-                                color: Colors.grey.shade400,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Objetivos de la Campaña',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No hay objetivos definidos',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      
-                      return ListView.separated(
-                        itemCount: goals.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final goal = goals[index];
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.green.withOpacity(0.2)),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Metas y progreso actual',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.grey,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Contenido de objetivos
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: FutureBuilder<List<Map<String, dynamic>>>(
+                      future: CampaignServices().getCampaignGoals(campaign.id),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  goal['description'] ?? 'Sin descripción',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.green,
+                                    strokeWidth: 3,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.straighten,
-                                      size: 16,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Métrica: ${goal['metric'] ?? 'N/A'}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.flag,
-                                      size: 16,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Objetivo: ${goal['targetValue'] ?? 0}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Icon(
-                                      Icons.trending_up,
-                                      size: 16,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Actual: ${goal['currentValue'] ?? 0}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Cargando objetivos...',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),
                           );
-                        },
-                      );
-                    },
+                        }
+                        
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.red.withOpacity(0.2)),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: Colors.red.shade400,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Error al cargar objetivos',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.red.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${snapshot.error}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.red.shade600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        final goals = snapshot.data ?? [];
+                        
+                        if (goals.isEmpty) {
+                          return Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(32),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(
+                                      Icons.flag_outlined,
+                                      size: 48,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'No hay objetivos definidos',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Agrega objetivos para hacer seguimiento del progreso de tu campaña',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                      height: 1.4,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        return ListView.separated(
+                          itemCount: goals.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final goal = goals[index];
+                            final targetValue = goal['targetValue'] ?? 0;
+                            final currentValue = goal['currentValue'] ?? 0;
+                            final progress = targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
+                            
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.green.withOpacity(0.2)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.withOpacity(0.08),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Header del objetivo
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Colors.green.withOpacity(0.05),
+                                          Colors.green.withOpacity(0.02),
+                                        ],
+                                      ),
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(16),
+                                        topRight: Radius.circular(16),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(
+                                            Icons.flag,
+                                            size: 20,
+                                            color: Colors.green.shade600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            goal['description'] ?? 'Sin descripción',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            '${(progress * 100).toInt()}%',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.green.shade700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  // Contenido del objetivo
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Métrica
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade50,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.straighten,
+                                                size: 18,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Métrica:',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  goal['metric'] ?? 'N/A',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        
+                                        // Progreso visual
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Progreso',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.grey.shade700,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '$currentValue / $targetValue',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.green.shade700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Container(
+                                              height: 8,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade200,
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(4),
+                                                child: LinearProgressIndicator(
+                                                  value: progress,
+                                                  backgroundColor: Colors.transparent,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                                    progress >= 1.0
+                                                        ? Colors.green.shade600
+                                                        : progress >= 0.7
+                                                            ? Colors.green.shade500
+                                                            : progress >= 0.4
+                                                                ? Colors.orange.shade500
+                                                                : Colors.red.shade400,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -2233,136 +2892,435 @@ class CampaignCard extends StatelessWidget {
   void _showChannelsList(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           child: Container(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.7,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: MediaQuery.of(context).size.width * 0.92,
             ),
-            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, 15),
+                ),
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.campaign_outlined,
-                      color: Colors.blue,
-                      size: 24,
+                // Header moderno con gradiente
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.blue.shade50,
+                        Colors.blue.shade100.withOpacity(0.7),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Canales de Comunicación',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.campaign,
+                          color: Colors.blue,
+                          size: 28,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                
-                // Lista de canales
-                Expanded(
-                  child: FutureBuilder<List<Map<String, dynamic>>>(
-                    future: CampaignServices().getCampaignChannels(campaign.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Text(
-                            'Error al cargar canales: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        );
-                      }
-                      
-                      final channels = snapshot.data ?? [];
-                      
-                      if (channels.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.campaign_outlined,
-                                size: 48,
-                                color: Colors.grey.shade400,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Canales de Canales',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No hay canales definidos',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      
-                      return ListView.separated(
-                        itemCount: channels.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final channel = channels[index];
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.blue.withOpacity(0.2)),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Medios de contacto y notificación',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.grey,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Contenido de canales
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: FutureBuilder<List<Map<String, dynamic>>>(
+                      future: CampaignServices().getCampaignChannels(campaign.id),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.contact_phone,
-                                      size: 16,
-                                      color: Colors.blue,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      channel['type'] ?? 'Sin tipo',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.blue,
+                                    strokeWidth: 3,
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  channel['details'] ?? 'Sin detalles',
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Cargando canales...',
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey,
                                   ),
                                 ),
                               ],
                             ),
                           );
-                        },
-                      );
-                    },
+                        }
+                        
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.red.withOpacity(0.2)),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: Colors.red.shade400,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Error al cargar canales',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.red.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${snapshot.error}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.red.shade600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        final channels = snapshot.data ?? [];
+                        
+                        if (channels.isEmpty) {
+                          return Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(32),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(
+                                      Icons.campaign_outlined,
+                                      size: 48,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'No hay canales definidos',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Agrega canales para establecer medios de comunicación para tu campaña',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                      height: 1.4,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        return ListView.separated(
+                          itemCount: channels.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final channel = channels[index];
+                            final channelType = channel['type'] ?? 'Sin tipo';
+                            final channelDetails = channel['details'] ?? 'Sin detalles';
+                            
+                            // Iconos y colores según el tipo de canal
+                            IconData channelIcon;
+                            Color channelColor = Colors.blue;
+                            
+                            switch (channelType.toLowerCase()) {
+                              case 'whatsapp':
+                              case 'whatsapp business':
+                                channelIcon = Icons.chat;
+                                channelColor = Colors.green;
+                                break;
+                              case 'email':
+                              case 'email corporativo':
+                                channelIcon = Icons.email;
+                                channelColor = Colors.red;
+                                break;
+                              case 'sms':
+                                channelIcon = Icons.sms;
+                                channelColor = Colors.orange;
+                                break;
+                              case 'telegram':
+                                channelIcon = Icons.telegram;
+                                channelColor = Colors.blue;
+                                break;
+                              case 'llamada telefónica':
+                              case 'teléfono':
+                                channelIcon = Icons.phone;
+                                channelColor = Colors.purple;
+                                break;
+                              case 'reunión presencial':
+                                channelIcon = Icons.people;
+                                channelColor = Colors.brown;
+                                break;
+                              case 'slack':
+                                channelIcon = Icons.forum;
+                                channelColor = Colors.indigo;
+                                break;
+                              case 'microsoft teams':
+                                channelIcon = Icons.video_call;
+                                channelColor = Colors.deepPurple;
+                                break;
+                              default:
+                                channelIcon = Icons.contact_phone;
+                                channelColor = Colors.blue;
+                            }
+                            
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: channelColor.withOpacity(0.2)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: channelColor.withOpacity(0.08),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Header del canal
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          channelColor.withOpacity(0.05),
+                                          channelColor.withOpacity(0.02),
+                                        ],
+                                      ),
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(16),
+                                        topRight: Radius.circular(16),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: channelColor.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(
+                                            channelIcon,
+                                            size: 24,
+                                            color: channelColor,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                channelType,
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: channelColor.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Text(
+                                                  'Activo',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: channelColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: channelColor.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 16,
+                                            color: channelColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  // Detalles del canal
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.info_outline,
+                                                size: 18,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Detalles del canal',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            channelDetails,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black87,
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

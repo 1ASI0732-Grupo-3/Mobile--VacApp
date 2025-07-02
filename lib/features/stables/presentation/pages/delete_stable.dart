@@ -106,14 +106,15 @@ Future<bool> _showSimpleDeleteDialog(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: primary,
+                  letterSpacing: -0.5,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
               
-              // Descripción
+              const SizedBox(height: 12),
+              
+              // Descripción en 2 líneas
               const Text(
-                '¿Estás seguro de que deseas eliminar este establo?',
+                '¿Estás seguro de que deseas\neliminar este establo?',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
@@ -201,7 +202,7 @@ Future<bool> _showSimpleDeleteDialog(
                           ),
                           SizedBox(width: 6),
                           Text(
-                            'Sin animales - Listo para eliminar',
+                            'Sin animales\nListo para eliminar',
                             style: TextStyle(
                               color: Colors.green,
                               fontSize: 12,
@@ -1766,8 +1767,7 @@ Future<bool> _deleteStable(
         const SnackBar(
           content: Text('Establo eliminado exitosamente'),
           backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
+          behavior: SnackBarBehavior.fixed,
         ),
       );
     }
@@ -1786,8 +1786,7 @@ Future<bool> _deleteStable(
         SnackBar(
           content: Text('Error al eliminar establo: $e'),
           backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
+          behavior: SnackBarBehavior.fixed,
         ),
       );
     }

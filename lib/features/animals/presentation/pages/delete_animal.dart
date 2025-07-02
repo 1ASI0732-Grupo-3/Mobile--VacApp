@@ -314,13 +314,8 @@ Future<void> showDeleteAnimalDialog({
             ),
           ),
           backgroundColor: const Color(0xFF00695C),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          margin: const EdgeInsets.all(16),
+          behavior: SnackBarBehavior.fixed,
           duration: const Duration(seconds: 3),
-          elevation: 8,
         ),
       );
     }
