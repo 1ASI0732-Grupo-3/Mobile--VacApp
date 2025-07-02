@@ -4,6 +4,7 @@ import 'package:vacapp/features/campaings/presentation/bloc/campaign_bloc.dart';
 import 'package:vacapp/features/campaings/presentation/bloc/campaign_event.dart';
 import 'package:vacapp/features/campaings/presentation/bloc/campaign_state.dart';
 import 'package:vacapp/core/widgets/island_notification.dart';
+import 'package:vacapp/features/animals/presentation/widgets/StableDropdown.dart';
 
 class CreateCampaignPage extends StatefulWidget {
   const CreateCampaignPage({super.key});
@@ -16,11 +17,11 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _stableIdController = TextEditingController();
   
   DateTime? _startDate;
   DateTime? _endDate;
   String _selectedStatus = 'active';
+  int? _selectedStableId;
 
   final List<String> _statusOptions = [
     'active',
@@ -33,7 +34,6 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _stableIdController.dispose();
     super.dispose();
   }
 
@@ -45,13 +45,13 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     
-    if (date != null) {
+    if (date != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
       
-      if (time != null) {
+      if (time != null && mounted) {
         setState(() {
           _startDate = DateTime(
             date.year,
@@ -73,13 +73,13 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     
-    if (date != null) {
+    if (date != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
       
-      if (time != null) {
+      if (time != null && mounted) {
         setState(() {
           _endDate = DateTime(
             date.year,
@@ -103,6 +103,14 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
         return;
       }
 
+      if (_selectedStableId == null) {
+        IslandNotification.showError(
+          context,
+          message: 'Por favor selecciona un establo',
+        );
+        return;
+      }
+
       final campaignData = {
         'name': _nameController.text.trim(),
         'description': _descriptionController.text.trim(),
@@ -111,7 +119,7 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
         'status': _selectedStatus,
         'goals': [],
         'channels': [],
-        'stableId': int.tryParse(_stableIdController.text) ?? 0,
+        'stableId': _selectedStableId!,
       };
 
       context.read<CampaignBloc>().add(CreateCampaign(campaignData));
@@ -124,19 +132,7 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
     const lightGreen = Color(0xFFE8F5E8);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        title: const Text(
-          'Crear Campaña',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primary,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      backgroundColor: Colors.grey.shade50,
       body: BlocListener<CampaignBloc, CampaignState>(
         listener: (context, state) {
           if (state is CampaignCreated) {
@@ -148,7 +144,7 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
           } else if (state is CampaignError) {
             IslandNotification.showError(
               context,
-              message: state.message,
+              message: 'Error: ${state.message}',
             );
           }
         },
@@ -158,154 +154,175 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                primary.withOpacity(0.1),
-                lightGreen.withOpacity(0.2),
+                primary.withOpacity(0.05),
+                Colors.white,
+                lightGreen.withOpacity(0.1),
               ],
             ),
           ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+          child: CustomScrollView(
+            slivers: [
+              // App Bar moderno
+              SliverAppBar(
+                expandedHeight: 120,
+                floating: false,
+                pinned: true,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          primary,
+                          primary.withOpacity(0.8),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: lightGreen,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.campaign,
-                            size: 32,
-                            color: primary,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Nueva Campaña',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: primary,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.campaign,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Completa la información básica',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Text(
+                                    'Crear Nueva Campaña',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Configura los detalles de tu nueva campaña veterinaria',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-
-                  // Form Fields
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+                ),
+                leading: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      size: 20,
                     ),
+                  ),
+                ),
+              ),
+              
+              // Contenido del formulario
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Nombre
-                        _buildSectionTitle('Información General'),
-                        const SizedBox(height: 16),
-                        _buildTextField(
+                        // Información básica
+                        _buildModernSectionHeader(
+                          'Información Básica',
+                          'Detalles fundamentales de la campaña',
+                          Icons.info_outline,
+                          primary,
+                        ),
+                        const SizedBox(height: 20),
+                        _buildModernTextField(
                           controller: _nameController,
-                          label: 'Nombre de la campaña',
-                          hint: 'Ej: Campaña de Vacunación 2025',
-                          icon: Icons.title,
+                          label: 'Nombre de la Campaña',
+                          hint: 'Ej: Vacunación Anual 2025',
+                          icon: Icons.campaign_outlined,
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'El nombre es requerido';
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor ingresa un nombre';
                             }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
-
-                        // Descripción
-                        _buildTextField(
+                        const SizedBox(height: 16),
+                        _buildModernTextField(
                           controller: _descriptionController,
                           label: 'Descripción',
-                          hint: 'Describe el objetivo de la campaña...',
-                          icon: Icons.description,
+                          hint: 'Describe el propósito y objetivos de la campaña',
+                          icon: Icons.description_outlined,
                           maxLines: 3,
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'La descripción es requerida';
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor ingresa una descripción';
                             }
                             return null;
                           },
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Selección de establo
+                        _buildModernSectionHeader(
+                          'Establo Asignado',
+                          'Selecciona el establo para esta campaña',
+                          Icons.home_work,
+                          Colors.orange,
                         ),
                         const SizedBox(height: 20),
-
-                        // ID del Establo
-                        _buildTextField(
-                          controller: _stableIdController,
-                          label: 'ID del Establo',
-                          hint: 'Ej: 1',
-                          icon: Icons.home_work,
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'El ID del establo es requerido';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Debe ser un número válido';
-                            }
-                            return null;
+                        StableDropdown(
+                          selectedStableId: _selectedStableId,
+                          onChanged: (stableId) {
+                            setState(() {
+                              _selectedStableId = stableId;
+                            });
                           },
                         ),
-                        const SizedBox(height: 32),
-
-                        // Fechas
-                        _buildSectionTitle('Programación'),
-                        const SizedBox(height: 16),
                         
+                        const SizedBox(height: 32),
+                        
+                        // Fechas
+                        _buildModernSectionHeader(
+                          'Cronograma',
+                          'Define el período de duración de la campaña',
+                          Icons.schedule,
+                          Colors.blue,
+                        ),
+                        const SizedBox(height: 20),
                         Row(
                           children: [
                             Expanded(
-                              child: _buildDateField(
-                                label: 'Fecha de inicio',
+                              child: _buildModernDateField(
+                                label: 'Fecha de Inicio',
                                 date: _startDate,
                                 onTap: _selectStartDate,
                                 icon: Icons.play_arrow,
@@ -313,8 +330,8 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              child: _buildDateField(
-                                label: 'Fecha de fin',
+                              child: _buildModernDateField(
+                                label: 'Fecha de Fin',
                                 date: _endDate,
                                 onTap: _selectEndDate,
                                 icon: Icons.stop,
@@ -322,165 +339,247 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-
+                        
+                        const SizedBox(height: 32),
+                        
                         // Estado
-                        _buildDropdownField(),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Información adicional
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: lightGreen.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: primary.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: primary.withOpacity(0.8),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        const Expanded(
-                          child: Text(
-                            'Los objetivos y canales se pueden agregar después de crear la campaña.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: primary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Botones
-                  BlocBuilder<CampaignBloc, CampaignState>(
-                    builder: (context, state) {
-                      final isLoading = state is CampaignLoading;
-                      
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: isLoading ? null : () => Navigator.pop(context),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: BorderSide(color: primary.withOpacity(0.5)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                        _buildModernDropdownField(),
+                        
+                        const SizedBox(height: 40),
+                        
+                        // Botones de acción
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.shade300),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                              ),
-                              child: const Text(
-                                'Cancelar',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            flex: 2,
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _createCampaign,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primary,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 4,
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Crear Campaña',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () => Navigator.pop(context),
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: const Center(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.close_rounded,
+                                            color: Colors.grey,
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Cancelar',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [primary, primary.withOpacity(0.8)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primary.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: _createCampaign,
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: const Center(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_circle_outline,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Crear Campaña',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF00695C),
+  // Funciones modernas para construir widgets
+
+  Widget _buildModernSectionHeader(String title, String subtitle, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.05),
+            color.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildModernTextField({
     required TextEditingController controller,
     required String label,
     required String hint,
     required IconData icon,
     String? Function(String?)? validator,
-    TextInputType? keyboardType,
+    TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
   }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: const Color(0xFF00695C)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        validator: validator,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00695C).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFF00695C),
+              size: 20,
+            ),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF00695C), width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF00695C), width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
       ),
     );
   }
 
-  Widget _buildDateField({
+  Widget _buildModernDateField({
     required String label,
     required DateTime? date,
     required VoidCallback onTap,
@@ -489,78 +588,242 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey.shade50,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.blue,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      date != null
+                          ? '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}'
+                          : 'Seleccionar fecha',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: date != null ? Colors.black87 : Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.calendar_today,
+                color: Colors.grey.shade400,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernDropdownField() {
+    
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.purple.withOpacity(0.05),
+            Colors.purple.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.purple.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Row(
               children: [
-                Icon(icon, color: const Color(0xFF00695C), size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.toggle_on,
+                    color: Colors.purple,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Estado Inicial',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Define el estado de la campaña al crearla',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              date != null
-                  ? '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}'
-                  : 'Seleccionar fecha',
-              style: TextStyle(
-                fontSize: 14,
-                color: date != null ? Colors.black87 : Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: DropdownButtonFormField<String>(
+                value: _selectedStatus,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: InputBorder.none,
+                  prefixIcon: Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(_selectedStatus).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(
+                      _getStatusIcon(_selectedStatus),
+                      color: _getStatusColor(_selectedStatus),
+                      size: 16,
+                    ),
+                  ),
+                ),
+                items: _statusOptions.map((status) {
+                  return DropdownMenuItem(
+                    value: status,
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(status).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Icon(
+                            _getStatusIcon(status),
+                            color: _getStatusColor(status),
+                            size: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _getStatusLabel(status),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedStatus = value!;
+                  });
+                },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDropdownField() {
-    return DropdownButtonFormField<String>(
-      value: _selectedStatus,
-      decoration: InputDecoration(
-        labelText: 'Estado inicial',
-        prefixIcon: const Icon(Icons.flag, color: Color(0xFF00695C)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF00695C), width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
-      ),
-      items: _statusOptions.map((status) {
-        return DropdownMenuItem(
-          value: status,
-          child: Text(_getStatusDisplayName(status)),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedStatus = value!;
-        });
-      },
-    );
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'active':
+        return Colors.green;
+      case 'paused':
+        return Colors.orange;
+      case 'completed':
+        return Colors.blue;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
-  String _getStatusDisplayName(String status) {
+  IconData _getStatusIcon(String status) {
+    switch (status) {
+      case 'active':
+        return Icons.play_circle;
+      case 'paused':
+        return Icons.pause_circle;
+      case 'completed':
+        return Icons.check_circle;
+      case 'cancelled':
+        return Icons.cancel;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  String _getStatusLabel(String status) {
     switch (status) {
       case 'active':
         return 'Activa';
