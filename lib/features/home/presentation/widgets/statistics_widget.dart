@@ -240,7 +240,7 @@ class _LoadedStatistics extends StatelessWidget {
                 Expanded(
                   child: _buildStableMetric(
                     icon: Icons.pets,
-                    value: '${statistics.avgAnimalsPerStable.toStringAsFixed(1)}',
+                    value: statistics.avgAnimalsPerStable.toStringAsFixed(1),
                     label: 'Promedio',
                     subtitle: 'Animales/establo',
                   ),

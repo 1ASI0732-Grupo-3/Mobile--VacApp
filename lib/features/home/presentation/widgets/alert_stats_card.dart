@@ -234,7 +234,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                                   ],
                                 ),
                               ),
-                            ).toList(),
+                            ),
                             // Mostrar contador si hay más animales
                             if (widget.statistics.animalsWithoutVaccinesList.length > 3)
                               Padding(
