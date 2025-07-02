@@ -72,3 +72,16 @@ class LoadAllCampaignsWithDetails extends CampaignEvent {}
 class RefreshCampaigns extends CampaignEvent {}
 
 class ResetCampaignState extends CampaignEvent {}
+
+// Eventos para obtener conteos
+class LoadCampaignGoalsCount extends CampaignEvent {
+  final int campaignId;
+  
+  const LoadCampaignGoalsCount(this.campaignId);
+}
+
+class LoadCampaignChannelsCount extends CampaignEvent {
+  final int campaignId;
+  
+  const LoadCampaignChannelsCount(this.campaignId);
+}

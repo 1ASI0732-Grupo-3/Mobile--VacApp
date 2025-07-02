@@ -7,7 +7,6 @@ import 'package:vacapp/features/campaings/presentation/bloc/campaign_event.dart'
 import 'package:vacapp/features/campaings/presentation/bloc/campaign_state.dart';
 import 'package:vacapp/features/campaings/presentation/pages/create_campaign_page.dart';
 import 'package:vacapp/features/campaings/presentation/widgets/campaign_card.dart';
-import 'package:vacapp/features/campaings/presentation/widgets/goal_wizard_dialog.dart';
 import 'package:vacapp/core/widgets/island_notification.dart';
 
 class CampaignManagementPage extends StatefulWidget {
@@ -435,10 +434,14 @@ class _CampaignManagementPageState extends State<CampaignManagementPage> {
             },
             onStatusChange: (campaign, status) {
               _campaignBloc.add(UpdateCampaignStatus(campaign.id, status));
+              // Refresh counts after status change
+              _campaignBloc.add(LoadCampaignGoalsCount(campaign.id));
+              _campaignBloc.add(LoadCampaignChannelsCount(campaign.id));
             },
             onAddGoal: (campaign, goalData) {
-              // Mostrar diálogo específico para recolectar datos exactos de la API
-              _showGoalWizardDialog(campaign);
+              // El diálogo moderno ya está integrado en CampaignCard
+              // Los datos del goal se procesan directamente en el BLoC
+              _campaignBloc.add(AddGoalToCampaign(campaign.id, goalData));
             },
             onAddChannel: (campaign, channelData) {
               // Mostrar diálogo específico para recolectar datos exactos de la API
@@ -714,257 +717,6 @@ class _CampaignManagementPageState extends State<CampaignManagementPage> {
     );
   }
 
-  /// Diálogo específico para agregar goal con campos exactos de la API
-  void _showAddGoalDialogWithApiFields(campaign) {
-    final TextEditingController descriptionController = TextEditingController();
-    final TextEditingController metricController = TextEditingController();
-    final TextEditingController targetValueController = TextEditingController();
-    final TextEditingController currentValueController = TextEditingController(text: '0');
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header con ícono
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00695C).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.flag_outlined,
-                      size: 32,
-                      color: const Color(0xFF00695C),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Título
-                  const Text(
-                    'Agregar Objetivo',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Campaña: ${campaign.name} (ID: ${campaign.id})',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Campo: description (requerido)
-                  TextField(
-                    controller: descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Descripción *',
-                      hintText: 'Ej: Vacunar 100 animales contra fiebre aftosa',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.description),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Campo: metric (requerido)
-                  TextField(
-                    controller: metricController,
-                    decoration: const InputDecoration(
-                      labelText: 'Métrica *',
-                      hintText: 'Ej: animales, litros, hectáreas, dosis',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.straighten),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Campo: targetValue (requerido, número)
-                  TextField(
-                    controller: targetValueController,
-                    decoration: const InputDecoration(
-                      labelText: 'Valor objetivo *',
-                      hintText: 'Ej: 100',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.flag),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Campo: currentValue (opcional, número)
-                  TextField(
-                    controller: currentValueController,
-                    decoration: const InputDecoration(
-                      labelText: 'Valor actual',
-                      hintText: 'Progreso inicial (por defecto 0)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.trending_up),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Información de campos obligatorios
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.amber.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.info_outline, size: 16, color: Colors.amber.shade700),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '* Campos obligatorios. Estructura API: description, metric, targetValue, currentValue',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.amber.shade700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Botones de acción
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, size: 18),
-                          label: const Text('Cancelar'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey.shade600,
-                            side: BorderSide(color: Colors.grey.shade300),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            final description = descriptionController.text.trim();
-                            final metric = metricController.text.trim();
-                            final targetValueText = targetValueController.text.trim();
-                            final currentValueText = currentValueController.text.trim();
-                            
-                            // Validación de campos obligatorios
-                            if (description.isEmpty || metric.isEmpty || targetValueText.isEmpty) {
-                              IslandNotification.showError(
-                                context,
-                                message: 'Por favor, completa todos los campos obligatorios',
-                              );
-                              return;
-                            }
-                            
-                            // Validación de números
-                            final targetValue = int.tryParse(targetValueText);
-                            final currentValue = int.tryParse(currentValueText) ?? 0;
-                            
-                            if (targetValue == null || targetValue < 0) {
-                              IslandNotification.showError(
-                                context,
-                                message: 'El valor objetivo debe ser un número válido mayor o igual a 0',
-                              );
-                              return;
-                            }
-                            
-                            if (currentValue < 0) {
-                              IslandNotification.showError(
-                                context,
-                                message: 'El valor actual no puede ser negativo',
-                              );
-                              return;
-                            }
-                              
-                            // Crear payload exacto de la API
-                            final goalData = {
-                              'description': description,
-                              'metric': metric,
-                              'targetValue': targetValue,
-                              'currentValue': currentValue,
-                            };
-
-                            print('✅ [DEBUG] PATCH /api/v1/campaign/${campaign.id}/add-goal');
-                            print('✅ [DEBUG] Payload exacto de la API: $goalData');
-                            
-                            // Enviar al BLoC
-                            _campaignBloc.add(AddGoalToCampaign(campaign.id, goalData));
-                            Navigator.pop(context);
-                            
-                            IslandNotification.showSuccess(
-                              context,
-                              message: 'Objetivo agregado: $description',
-                            );
-                          },
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Agregar Objetivo'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00695C),
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          );
-      },
-    );
-  }
-
   /// Diálogo específico para agregar channel con campos exactos de la API
   void _showAddChannelDialogWithApiFields(campaign) {
     final TextEditingController typeController = TextEditingController();
@@ -1058,47 +810,6 @@ class _CampaignManagementPageState extends State<CampaignManagementPage> {
                       prefixIcon: Icon(Icons.info_outline),
                     ),
                     maxLines: 3,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Ejemplos de canales
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.withOpacity(0.2)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.lightbulb_outline, size: 16, color: Colors.blue.shade600),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Ejemplos de canales:',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '• Type: "WhatsApp", Details: "Grupo del equipo veterinario"\n'
-                          '• Type: "Email", Details: "admin@establo.com"\n'
-                          '• Type: "SMS", Details: "Notificaciones al +1234567890"',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: 16),
                   

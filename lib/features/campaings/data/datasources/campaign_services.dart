@@ -236,13 +236,9 @@ class CampaignServices {
   // GET /api/v1/campaign/{id}/goals - Obtener objetivos de una campaña
   Future<List<Map<String, dynamic>>> getCampaignGoals(int id) async {
     try {
-      final String? token = await TokenService.instance.getToken();
-      if (token == null || token.isEmpty) {
-        throw Exception('Token de autenticación no encontrado');
-      }
-
+      final token = await TokenService.instance.getToken();
       print('🎯 [CampaignService] getCampaignGoals - ID: $id');
-      
+
       final response = await http.get(
         Uri.parse('${Endpoints.campaign}/$id/goals'),
         headers: {
@@ -269,8 +265,8 @@ class CampaignServices {
   // GET /api/v1/campaign/{id}/channels - Obtener canales de una campaña
   Future<List<Map<String, dynamic>>> getCampaignChannels(int id) async {
     try {
-      final String? token = await TokenService.instance.getToken();
-      if (token == null || token.isEmpty) {
+      final String token = await TokenService.instance.getToken();
+      if (token.isEmpty) {
         throw Exception('Token de autenticación no encontrado');
       }
 

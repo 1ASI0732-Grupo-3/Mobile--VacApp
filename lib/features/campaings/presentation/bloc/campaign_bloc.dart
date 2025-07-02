@@ -237,8 +237,6 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
       emit(CampaignError('Error al cargar campañas con detalles: $e'));
     }
   }
-    }
-  }
 
   Future<void> _onRefreshCampaigns(
     RefreshCampaigns event,
