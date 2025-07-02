@@ -45,12 +45,9 @@ class CampaignRepository {
   // Actualizar estado de campaña
   Future<CampaingsDto> updateCampaignStatus(int id, String status) async {
     try {
-      print('🔍 [DEBUG] Repository: Actualizando estado de campaña ID: $id a estado: $status');
       final result = await _campaignServices.updateCampaignStatus(id, status);
-      print('✅ [DEBUG] Repository: Estado actualizado exitosamente');
       return result;
     } catch (e) {
-      print('❌ [DEBUG] Repository error en updateCampaignStatus: $e');
       throw Exception('Repository - Error al actualizar estado: $e');
     }
   }

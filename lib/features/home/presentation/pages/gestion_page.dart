@@ -4,6 +4,8 @@ import 'package:vacapp/features/vaccines/presentation/pages/vaccines_page.dart';
 import 'package:vacapp/features/vaccines/data/repositories/vaccines_repository.dart';
 import 'package:vacapp/features/vaccines/data/datasources/vaccines_services.dart';
 import 'package:vacapp/features/campaings/presentation/pages/campaign_management_page.dart';
+import 'package:vacapp/features/campaings/data/datasources/campaign_services.dart';
+import 'package:vacapp/features/campaings/data/repositories/campaign_repository.dart';
 
 class GestionPage extends StatefulWidget {
   const GestionPage({super.key});
@@ -22,6 +24,11 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
   late VaccinesRepository _repository;
   int _vaccinatedCount = 0;
   bool _isLoadingVaccines = true;
+  
+  // Para contar las campañas activas
+  late CampaignRepository _campaignRepository;
+  int _activeCampaignsCount = 0;
+  bool _isLoadingCampaigns = true;
 
   // Paleta institucional consistente
   static const Color primary = Color(0xFF00695C);
@@ -30,10 +37,10 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
   List<Map<String, dynamic>> get _gestionOptions => [
     {
       'title': 'Campañas',
-      'subtitle': 'Gestión de campañas de vacunación',
+      'subtitle': 'Gestión y seguimiento de campañas de vacunación y tratamientos',
       'icon': Icons.campaign_outlined,
       'gradient': [const Color(0xFF00695C), const Color(0xFF004D40)],
-      'badge': '12 activas',
+      'badge': _isLoadingCampaigns ? 'Cargando...' : '$_activeCampaignsCount activas',
       'action': 'campaigns',
     },
     {
@@ -58,8 +65,9 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
   void initState() {
     super.initState();
     
-    // Inicializar repositorio
+    // Inicializar repositorios
     _repository = VaccinesRepository(VaccinesService());
+    _campaignRepository = CampaignRepository(CampaignServices());
     
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -91,6 +99,7 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     _fadeController.forward();
     _slideController.forward();
     _loadVaccinatedCount();
+    _loadActiveCampaignsCount();
   }
 
   @override
@@ -120,6 +129,32 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     }
   }
 
+  Future<void> _loadActiveCampaignsCount() async {
+    try {
+      final campaigns = await _campaignRepository.getAllCampaigns();
+      if (mounted) {
+        // Contar solo las campañas activas
+        final activeCampaigns = campaigns.where((campaign) => 
+          campaign.status.toLowerCase() == 'active' || 
+          campaign.status.toLowerCase() == 'activa'
+        ).length;
+        
+        setState(() {
+          _activeCampaignsCount = activeCampaigns;
+          _isLoadingCampaigns = false;
+        });
+      }
+    } catch (e) {
+      print('❌ [DEBUG] Error loading campaigns count: $e');
+      if (mounted) {
+        setState(() {
+          _activeCampaignsCount = 0;
+          _isLoadingCampaigns = false;
+        });
+      }
+    }
+  }
+
   Future<void> _navigateToVaccines() async {
     await Navigator.push(
       context,
@@ -138,6 +173,8 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
         builder: (context) => const CampaignManagementPage(),
       ),
     );
+    // Recargar el conteo cuando regrese de la página de campañas
+    _loadActiveCampaignsCount();
   }
 
   void _handleOptionTap(String action) {

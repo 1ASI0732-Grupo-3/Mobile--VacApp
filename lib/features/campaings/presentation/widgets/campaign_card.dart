@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:vacapp/features/campaings/data/models/campaings_dto.dart';
 import 'package:vacapp/features/campaings/data/datasources/campaign_services.dart';
+import 'package:vacapp/features/stables/data/datasources/stables_service.dart';
 
-class CampaignCard extends StatelessWidget {
+class CampaignCard extends StatefulWidget {
   final CampaingsDto campaign;
   final Function(CampaingsDto)? onEdit;
   final Function(CampaingsDto) onDelete;
   final Function(CampaingsDto, String) onStatusChange;
   final Function(CampaingsDto, Map<String, dynamic>) onAddGoal;
   final Function(CampaingsDto, Map<String, dynamic>) onAddChannel;
+
+  // Caché estático para nombres de establos
+  static final Map<int, String> _stableNamesCache = {};
 
   const CampaignCard({
     super.key,
@@ -19,6 +23,137 @@ class CampaignCard extends StatelessWidget {
     required this.onAddGoal,
     required this.onAddChannel,
   });
+
+  @override
+  State<CampaignCard> createState() => _CampaignCardState();
+}
+
+class _CampaignCardState extends State<CampaignCard> {
+  // Variables de estado para los conteos
+  int? _goalsCount;
+  int? _channelsCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  // Cargar conteos iniciales de forma silenciosa
+  Future<void> _loadCounts() async {
+    try {
+      // Cargar en paralelo sin bloquear la UI
+      final results = await Future.wait([
+        _getGoalsCount(),
+        _getChannelsCount(),
+      ]);
+      
+      if (mounted) {
+        setState(() {
+          _goalsCount = results[0];
+          _channelsCount = results[1];
+        });
+      }
+    } catch (e) {
+      // En caso de error, usar valores fallback sin mostrar error al usuario
+      if (mounted) {
+        setState(() {
+          _goalsCount ??= widget.campaign.goals.length;
+          _channelsCount ??= widget.campaign.channels.length;
+        });
+      }
+    }
+  }
+
+  // Método para refrescar conteos después de agregar elementos
+  Future<void> _refreshCounts() async {
+    if (!mounted) return;
+    
+    // Delay muy pequeño para permitir que la API se actualice
+    await Future.delayed(const Duration(milliseconds: 200));
+    
+    if (!mounted) return;
+    
+    try {
+      // Cargar en paralelo de forma silenciosa
+      final results = await Future.wait([
+        _getGoalsCount(),
+        _getChannelsCount(),
+      ]);
+      
+      if (mounted) {
+        setState(() {
+          _goalsCount = results[0];
+          _channelsCount = results[1];
+        });
+      }
+    } catch (e) {
+      // En caso de error, mantener los valores actuales sin mostrar error
+      // Los conteos se actualizarán la próxima vez que se cargue la tarjeta
+    }
+  }
+  
+  // Método para obtener el nombre del establo (con caché optimizado)
+  Future<String> _getStableName(int stableId) async {
+    // Si ya tenemos el nombre en caché, devolverlo inmediatamente
+    if (CampaignCard._stableNamesCache.containsKey(stableId)) {
+      return CampaignCard._stableNamesCache[stableId]!;
+    }
+    
+    // Si no está en caché, obtenerlo de la API
+    try {
+      final stableServices = StablesService();
+      final stable = await stableServices.fetchStableById(stableId);
+      
+      // Guardar en caché para futuras consultas
+      CampaignCard._stableNamesCache[stableId] = stable.name;
+      
+      return stable.name;
+    } catch (e) {
+      final fallbackName = 'Establo $stableId';
+      CampaignCard._stableNamesCache[stableId] = fallbackName; // Cachear también el fallback
+      return fallbackName;
+    }
+  }
+
+  // Widget optimizado para mostrar nombres de establos
+  Widget _buildStableName(int stableId, {TextStyle? style}) {
+    // Si ya tenemos el nombre en caché, mostrarlo inmediatamente
+    if (CampaignCard._stableNamesCache.containsKey(stableId)) {
+      return Text(
+        CampaignCard._stableNamesCache[stableId]!,
+        style: style,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.start,
+      );
+    }
+    
+    // Si no está en caché, usar FutureBuilder pero con un placeholder mejor
+    return FutureBuilder<String>(
+      future: _getStableName(stableId),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text(
+            snapshot.data!,
+            style: style,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
+          );
+        }
+        
+        // Mostrar placeholder más discreto mientras carga
+        return Text(
+          'Establo $stableId',
+          style: style,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.start,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,19 +213,11 @@ class CampaignCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            campaign.name,
+                            widget.campaign.name,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Código: ${campaign.id} • Establo: ${_getStableName()}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
                             ),
                           ),
                         ],
@@ -101,7 +228,7 @@ class CampaignCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  campaign.description,
+                  widget.campaign.description,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade700,
@@ -109,6 +236,115 @@ class CampaignCard extends StatelessWidget {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+
+                // Información del código y establo
+                Row(
+                  children: [
+                    // Código de la campaña (más pequeño)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5A623).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFF5A623).withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Código',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFFF5A623),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5A623),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Icon(
+                                  Icons.tag,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '#${widget.campaign.id.toString().padLeft(3, '0')}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFF5A623),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Información del establo (más grande)
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: primary.withOpacity(0.3)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Establo',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: primary,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.home,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildStableName(
+                                    widget.campaign.stableId,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -153,7 +389,7 @@ class CampaignCard extends StatelessWidget {
                           Expanded(
                             child: _buildDateInfo(
                               'Inicio',
-                              campaign.startDate,
+                              widget.campaign.startDate,
                               Icons.play_arrow,
                               Colors.green,
                             ),
@@ -167,7 +403,7 @@ class CampaignCard extends StatelessWidget {
                           Expanded(
                             child: _buildDateInfo(
                               'Fin',
-                              campaign.endDate,
+                              widget.campaign.endDate,
                               Icons.stop,
                               Colors.red,
                             ),
@@ -245,7 +481,7 @@ class CampaignCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Del ${_formatDate(campaign.startDate)} al ${_formatDate(campaign.endDate)}',
+                              'Del ${_formatDate(widget.campaign.startDate)} al ${_formatDate(widget.campaign.endDate)}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,
@@ -283,18 +519,13 @@ class CampaignCard extends StatelessWidget {
                                   color: primary,
                                 ),
                                 const SizedBox(width: 8),
-                                FutureBuilder<int>(
-                                  future: _getGoalsCount(),
-                                  builder: (context, snapshot) {
-                                    return Text(
-                                      snapshot.data?.toString() ?? '0',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: primary,
-                                      ),
-                                    );
-                                  },
+                                Text(
+                                  (_goalsCount ?? widget.campaign.goals.length).toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: primary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -362,18 +593,13 @@ class CampaignCard extends StatelessWidget {
                                   color: Colors.blue,
                                 ),
                                 const SizedBox(width: 8),
-                                FutureBuilder<int>(
-                                  future: _getChannelsCount(),
-                                  builder: (context, snapshot) {
-                                    return Text(
-                                      snapshot.data?.toString() ?? '0',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
-                                      ),
-                                    );
-                                  },
+                                Text(
+                                  (_channelsCount ?? widget.campaign.channels.length).toString(),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
                                 ),
                               ],
                             ),
@@ -467,7 +693,7 @@ class CampaignCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _getStatusDisplayName(campaign.status),
+                              _getStatusDisplayName(widget.campaign.status),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -608,7 +834,7 @@ class CampaignCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => onDelete(campaign),
+                    onPressed: () => widget.onDelete(widget.campaign),
                     icon: const Icon(Icons.delete_outline, size: 18),
                     label: const Text('Eliminar Campaña'),
                     style: OutlinedButton.styleFrom(
@@ -638,7 +864,7 @@ class CampaignCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        _getStatusDisplayName(campaign.status),
+        _getStatusDisplayName(widget.campaign.status),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
@@ -687,7 +913,7 @@ class CampaignCard extends StatelessWidget {
   }
 
   Color _getStatusColor() {
-    return _getColorForStatus(campaign.status);
+    return _getColorForStatus(widget.campaign.status);
   }
 
   Color _getColorForStatus(String status) {
@@ -855,7 +1081,7 @@ class CampaignCard extends StatelessWidget {
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Text(
-                      campaign.name,
+                      widget.campaign.name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -893,7 +1119,7 @@ class CampaignCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          _getStatusDisplayName(campaign.status),
+                          _getStatusDisplayName(widget.campaign.status),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -918,7 +1144,7 @@ class CampaignCard extends StatelessWidget {
                   
                   // Opciones de estado
                   ..._getAvailableStatuses().map((status) {
-                    final isCurrentStatus = status == _normalizeStatusForDropdown(campaign.status);
+                    final isCurrentStatus = status == _normalizeStatusForDropdown(widget.campaign.status);
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       child: Material(
@@ -926,7 +1152,7 @@ class CampaignCard extends StatelessWidget {
                         child: InkWell(
                           onTap: isCurrentStatus ? null : () {
                             Navigator.pop(context);
-                            onStatusChange(campaign, _normalizeStatusForBackend(status));
+                            widget.onStatusChange(widget.campaign, _normalizeStatusForBackend(status));
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
@@ -1679,12 +1905,19 @@ class CampaignCard extends StatelessWidget {
                                       'currentValue': 0,
                                     };
 
-                                    print('✅ [DEBUG] Enviando goal con payload: $goalData');
-                                    print('✅ [DEBUG] Para campaña ID: ${campaign.id}');
+                                    
                                     
                                     Navigator.pop(context);
                                     
-                                    onAddGoal(campaign, goalData);
+                                    widget.onAddGoal(widget.campaign, goalData);
+                                    
+                                    // Incrementar inmediatamente el contador local para UI reactiva
+                                    setState(() {
+                                      _goalsCount = (_goalsCount ?? widget.campaign.goals.length) + 1;
+                                    });
+                                    
+                                    // Actualizar conteos después de agregar goal (sin await para no bloquear UI)
+                                    _refreshCounts();
                                     
                                     // Show success message at the top
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -2039,32 +2272,32 @@ class CampaignCard extends StatelessWidget {
     
     switch (channelType) {
       case 'WhatsApp Business':
-        defaultDetails = 'Grupo de WhatsApp para actualizaciones de la campaña ${campaign.name}';
+        defaultDetails = 'Grupo de WhatsApp para actualizaciones de la campaña ${widget.campaign.name}';
         hintText = 'Ej: Número/grupo de WhatsApp, horarios de comunicación';
         helperText = 'Especifica el número, grupo o detalles del contacto';
         break;
       case 'Email corporativo':
-        defaultDetails = 'Correos electrónicos para notificaciones de la campaña ${campaign.name}';
+        defaultDetails = 'Correos electrónicos para notificaciones de la campaña ${widget.campaign.name}';
         hintText = 'Ej: emails@empresa.com, frecuencia de envío';
         helperText = 'Indica las direcciones de email y frecuencia';
         break;
       case 'SMS':
-        defaultDetails = 'Mensajes de texto para recordatorios urgentes de la campaña ${campaign.name}';
+        defaultDetails = 'Mensajes de texto para recordatorios urgentes de la campaña ${widget.campaign.name}';
         hintText = 'Ej: Números telefónicos, horarios de envío';
         helperText = 'Especifica números y horarios de envío';
         break;
       case 'Llamada telefónica':
-        defaultDetails = 'Llamadas telefónicas para seguimiento de la campaña ${campaign.name}';
+        defaultDetails = 'Llamadas telefónicas para seguimiento de la campaña ${widget.campaign.name}';
         hintText = 'Ej: Números de contacto, horarios de llamada';
         helperText = 'Indica números y horarios disponibles';
         break;
       case 'Reunión presencial':
-        defaultDetails = 'Reuniones presenciales para coordinar la campaña ${campaign.name}';
+        defaultDetails = 'Reuniones presenciales para coordinar la campaña ${widget.campaign.name}';
         hintText = 'Ej: Lugar, frecuencia, horarios de reunión';
         helperText = 'Especifica lugar, frecuencia y horarios';
         break;
       default:
-        defaultDetails = 'Canal de comunicación para la campaña ${campaign.name}';
+        defaultDetails = 'Canal de comunicación para la campaña ${widget.campaign.name}';
         hintText = 'Describe cómo funciona este canal';
         helperText = 'Proporciona detalles ';
     }
@@ -2320,13 +2553,20 @@ class CampaignCard extends StatelessWidget {
                                     'details': detailsController.text.trim(),
                                   };
 
-                                  print('✅ [DEBUG] Enviando channel con payload exacto de la API: $channelData');
-                                  print('✅ [DEBUG] Para campaña ID: ${campaign.id}');
+                                  
                                   
                                   Navigator.pop(context);
                                   
                                   // Usar la función callback para agregar el channel con los datos
-                                  onAddChannel(campaign, channelData);
+                                  widget.onAddChannel(widget.campaign, channelData);
+                                  
+                                  // Incrementar inmediatamente el contador local para UI reactiva
+                                  setState(() {
+                                    _channelsCount = (_channelsCount ?? widget.campaign.channels.length) + 1;
+                                  });
+                                  
+                                  // Actualizar conteos después de agregar channel (sin await para no bloquear UI)
+                                  _refreshCounts();
                                   
                                   // Show success message at the top
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -2410,35 +2650,18 @@ class CampaignCard extends StatelessWidget {
 
   // Calcula la duración de la campaña en días
   int _getCampaignDurationInDays() {
-    final difference = campaign.endDate.difference(campaign.startDate);
+    final difference = widget.campaign.endDate.difference(widget.campaign.startDate);
     return difference.inDays + 1; // +1 para incluir ambos días (inicio y fin)
-  }
-
-  // Obtiene el nombre del establo basado en el ID
-  String _getStableName() {
-    // TODO: Implementar obtención del nombre del establo desde la API
-    // Por ahora retornamos el ID del establo
-    switch (campaign.stableId) {
-      case 1:
-        return 'Establo Principal';
-      case 2:
-        return 'Establo Secundario';
-      case 3:
-        return 'Establo de Cuarentena';
-      default:
-        return 'Establo ${campaign.stableId}';
-    }
   }
 
   Future<int> _getGoalsCount() async {
     try {
       // Usar el método del service para obtener goals reales
       final campaignServices = CampaignServices();
-      final goals = await campaignServices.getCampaignGoals(campaign.id);
+      final goals = await campaignServices.getCampaignGoals(widget.campaign.id);
       return goals.length;
     } catch (e) {
-      print('Error obteniendo conteo de goals: $e');
-      return campaign.goals.length; // Fallback al conteo local
+      return widget.campaign.goals.length; // Fallback al conteo local
     }
   }
 
@@ -2446,11 +2669,10 @@ class CampaignCard extends StatelessWidget {
     try {
       // Usar el método del service para obtener channels reales
       final campaignServices = CampaignServices();
-      final channels = await campaignServices.getCampaignChannels(campaign.id);
+      final channels = await campaignServices.getCampaignChannels(widget.campaign.id);
       return channels.length;
     } catch (e) {
-      print('Error obteniendo conteo de channels: $e');
-      return campaign.channels.length; // Fallback al conteo local
+      return widget.campaign.channels.length; // Fallback al conteo local
     }
   }
 
@@ -2563,7 +2785,7 @@ class CampaignCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                     child: FutureBuilder<List<Map<String, dynamic>>>(
-                      future: CampaignServices().getCampaignGoals(campaign.id),
+                      future: CampaignServices().getCampaignGoals(widget.campaign.id),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Center(
@@ -2998,7 +3220,7 @@ class CampaignCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                     child: FutureBuilder<List<Map<String, dynamic>>>(
-                      future: CampaignServices().getCampaignChannels(campaign.id),
+                      future: CampaignServices().getCampaignChannels(widget.campaign.id),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Center(

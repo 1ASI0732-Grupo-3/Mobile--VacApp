@@ -21,7 +21,7 @@ class _CreateCampaignPageState extends State<CreateCampaignPage> {
   
   DateTime? _startDate;
   DateTime? _endDate;
-  String _selectedStatus = 'pending';
+  final String _selectedStatus = 'pending';
   int? _selectedStableId;
 
 
@@ -944,8 +944,7 @@ class _DatePickerModalState extends State<_DatePickerModal> {
               children: [
                 CupertinoButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  padding: EdgeInsets.zero,
-                  minSize: 0,
+                  padding: EdgeInsets.zero, minimumSize: Size(0, 0),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
@@ -985,8 +984,7 @@ class _DatePickerModalState extends State<_DatePickerModal> {
                     widget.onDateTimeChanged(selectedDate);
                     Navigator.of(context).pop();
                   },
-                  padding: EdgeInsets.zero,
-                  minSize: 0,
+                  padding: EdgeInsets.zero, minimumSize: Size(0, 0),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(

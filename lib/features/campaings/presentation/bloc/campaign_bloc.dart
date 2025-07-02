@@ -18,6 +18,8 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
     on<AddChannelToCampaign>(_onAddChannelToCampaign);
     on<LoadCampaignGoals>(_onLoadCampaignGoals);
     on<LoadCampaignChannels>(_onLoadCampaignChannels);
+    on<LoadCampaignGoalsCount>(_onLoadCampaignGoalsCount);
+    on<LoadCampaignChannelsCount>(_onLoadCampaignChannelsCount);
     on<LoadAllCampaignsWithDetails>(_onLoadAllCampaignsWithDetails);
     on<RefreshCampaigns>(_onRefreshCampaigns);
     on<ResetCampaignState>(_onResetCampaignState);
@@ -33,6 +35,11 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
       if (campaigns.isEmpty) {
         emit(const CampaignEmpty('No hay campañas registradas'));
       } else {
+        // Mostrar información de campañas cargadas
+        print('Campañas cargadas: ${campaigns.length} campañas encontradas');
+        for (final campaign in campaigns) {
+          print('  - ID: ${campaign.id}, Nombre: ${campaign.name}, Estado: ${campaign.status}, Establo: ${campaign.stableId}');
+        }
         emit(CampaignLoaded(campaigns));
       }
     } catch (e) {
@@ -90,18 +97,14 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
     UpdateCampaignStatus event,
     Emitter<CampaignState> emit,
   ) async {
-    print('🔍 [DEBUG] BLoC: Iniciando actualización de estado para campaña ID: ${event.id} a estado: ${event.status}');
     emit(CampaignLoading());
     try {
       final campaign = await _repository.updateCampaignStatus(event.id, event.status);
-      print('✅ [DEBUG] BLoC: Estado actualizado exitosamente. Emitiendo CampaignUpdated');
       emit(CampaignUpdated(campaign));
       
       // Recargar todas las campañas después de actualizar
-      print('🔍 [DEBUG] BLoC: Recargando todas las campañas después de actualizar estado');
       add(LoadAllCampaigns());
     } catch (e) {
-      print('❌ [DEBUG] BLoC error en updateCampaignStatus: $e');
       emit(CampaignError('Error al actualizar estado: $e'));
     }
   }
@@ -126,19 +129,14 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
     AddGoalToCampaign event,
     Emitter<CampaignState> emit,
   ) async {
-    print('🔍 [DEBUG] BLoC: Iniciando agregar goal para campaña ID: ${event.campaignId}');
-    print('🔍 [DEBUG] BLoC: Goal data: ${event.goalData}');
     emit(CampaignLoading());
     try {
       final campaign = await _repository.addGoalToCampaign(event.campaignId, event.goalData);
-      print('✅ [DEBUG] BLoC: Goal agregado exitosamente. Emitiendo CampaignUpdated');
       emit(CampaignUpdated(campaign));
       
       // Recargar todas las campañas después de agregar goal
-      print('🔍 [DEBUG] BLoC: Recargando todas las campañas después de agregar goal');
       add(LoadAllCampaigns());
     } catch (e) {
-      print('❌ [DEBUG] BLoC error en addGoalToCampaign: $e');
       emit(CampaignError('Error al agregar objetivo: $e'));
     }
   }
@@ -147,19 +145,14 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
     AddChannelToCampaign event,
     Emitter<CampaignState> emit,
   ) async {
-    print('🔍 [DEBUG] BLoC: Iniciando agregar channel para campaña ID: ${event.campaignId}');
-    print('🔍 [DEBUG] BLoC: Channel data: ${event.channelData}');
     emit(CampaignLoading());
     try {
       final campaign = await _repository.addChannelToCampaign(event.campaignId, event.channelData);
-      print('✅ [DEBUG] BLoC: Channel agregado exitosamente. Emitiendo CampaignUpdated');
       emit(CampaignUpdated(campaign));
       
       // Recargar todas las campañas después de agregar channel
-      print('🔍 [DEBUG] BLoC: Recargando todas las campañas después de agregar channel');
       add(LoadAllCampaigns());
     } catch (e) {
-      print('❌ [DEBUG] BLoC error en addChannelToCampaign: $e');
       emit(CampaignError('Error al agregar canal: $e'));
     }
   }
@@ -190,6 +183,32 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
     }
   }
 
+  Future<void> _onLoadCampaignGoalsCount(
+    LoadCampaignGoalsCount event,
+    Emitter<CampaignState> emit,
+  ) async {
+    try {
+      await _repository.getCampaignGoals(event.campaignId);
+      // No emitir estado ya que esto es solo para obtener el conteo
+      // El conteo se maneja en la UI directamente
+    } catch (e) {
+      // Manejar error silenciosamente para no interrumpir el flujo
+    }
+  }
+
+  Future<void> _onLoadCampaignChannelsCount(
+    LoadCampaignChannelsCount event,
+    Emitter<CampaignState> emit,
+  ) async {
+    try {
+      await _repository.getCampaignChannels(event.campaignId);
+      // No emitir estado ya que esto es solo para obtener el conteo
+      // El conteo se maneja en la UI directamente
+    } catch (e) {
+      // Manejar error silenciosamente para no interrumpir el flujo
+    }
+  }
+
   Future<void> _onLoadAllCampaignsWithDetails(
     LoadAllCampaignsWithDetails event,
     Emitter<CampaignState> emit,
@@ -214,7 +233,6 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
           final goals = await _repository.getCampaignGoals(campaign.id);
           campaignGoals[campaign.id] = goals;
         } catch (e) {
-          print('⚠️ Error cargando goals para campaña ${campaign.id}: $e');
           campaignGoals[campaign.id] = [];
         }
 
@@ -223,7 +241,6 @@ class CampaignBloc extends Bloc<CampaignEvent, CampaignState> {
           final channels = await _repository.getCampaignChannels(campaign.id);
           campaignChannels[campaign.id] = channels;
         } catch (e) {
-          print('⚠️ Error cargando channels para campaña ${campaign.id}: $e');
           campaignChannels[campaign.id] = [];
         }
       }

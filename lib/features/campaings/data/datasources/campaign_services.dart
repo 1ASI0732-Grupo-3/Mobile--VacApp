@@ -10,7 +10,6 @@ class CampaignServices {
   Future<List<CampaingsDto>> getAllCampaigns() async {
     try {
       final token = await TokenService.instance.getToken();
-      print('🔍 [DEBUG] Token obtenido para campañas: ${token.isNotEmpty ? "Token presente" : "Token vacío"}');
       
       final response = await http.get(
         Uri.parse('${Endpoints.campaign}/all-campaigns'),
@@ -20,8 +19,6 @@ class CampaignServices {
         },
       );
 
-      print('🔍 [DEBUG] Response status: ${response.statusCode}');
-      print('🔍 [DEBUG] Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -30,7 +27,6 @@ class CampaignServices {
         throw Exception('Error al obtener campañas: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('❌ [DEBUG] Error en getAllCampaigns: $e');
       throw Exception('Error de conexión: $e');
     }
   }
@@ -111,8 +107,6 @@ class CampaignServices {
   Future<CampaingsDto> updateCampaignStatus(int id, String status) async {
     try {
       final token = await TokenService.instance.getToken();
-      print('🔍 [DEBUG] Token obtenido para actualizar estado: ${token.isNotEmpty ? "Token presente" : "Token vacío"}');
-      print('🔍 [DEBUG] Actualizando estado de campaña ID: $id a estado: $status');
       
       final response = await http.patch(
         Uri.parse('${Endpoints.campaign}/$id/update-status'),
@@ -128,27 +122,20 @@ class CampaignServices {
         },
       );
 
-      print('🔍 [DEBUG] Response status para updateCampaignStatus: ${response.statusCode}');
-      print('🔍 [DEBUG] Response body para updateCampaignStatus: ${response.body}');
 
       // Aceptar tanto 200 como 201 como respuestas exitosas
       if (response.statusCode == 200 || response.statusCode == 201) {
         try {
           final Map<String, dynamic> data = jsonDecode(response.body);
           final updatedCampaign = CampaingsDto.fromJson(data);
-          print('✅ [DEBUG] Estado actualizado exitosamente. Nuevo estado: ${updatedCampaign.status}');
           return updatedCampaign;
         } catch (parseError) {
-          print('❌ [DEBUG] Error al parsear respuesta JSON: $parseError');
-          print('❌ [DEBUG] Response body que falló: ${response.body}');
           throw Exception('Error al procesar respuesta del servidor: $parseError');
         }
       } else {
-        print('❌ [DEBUG] Error en updateCampaignStatus: Status ${response.statusCode}');
         throw Exception('Error al actualizar estado: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('❌ [DEBUG] Error en updateCampaignStatus: $e');
       throw Exception('Error de conexión: $e');
     }
   }
@@ -157,9 +144,6 @@ class CampaignServices {
   Future<CampaingsDto> addGoalToCampaign(int id, Map<String, dynamic> goalData) async {
     try {
       final token = await TokenService.instance.getToken();
-      print('🔍 [DEBUG] Token obtenido para agregar goal: ${token.isNotEmpty ? "Token presente" : "Token vacío"}');
-      print('🔍 [DEBUG] Agregando goal a campaña ID: $id');
-      print('🔍 [DEBUG] Goal data enviado: $goalData');
       
       final response = await http.patch(
         Uri.parse('${Endpoints.campaign}/$id/add-goal'),
@@ -175,20 +159,15 @@ class CampaignServices {
         },
       );
 
-      print('🔍 [DEBUG] Response status para addGoalToCampaign: ${response.statusCode}');
-      print('🔍 [DEBUG] Response body para addGoalToCampaign: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final updatedCampaign = CampaingsDto.fromJson(data);
-        print('✅ [DEBUG] Goal agregado exitosamente. Nuevos goals: ${updatedCampaign.goals.length}');
         return updatedCampaign;
       } else {
-        print('❌ [DEBUG] Error en addGoalToCampaign: Status ${response.statusCode}');
         throw Exception('Error al agregar objetivo: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('❌ [DEBUG] Error en addGoalToCampaign: $e');
       throw Exception('Error de conexión: $e');
     }
   }
@@ -197,9 +176,6 @@ class CampaignServices {
   Future<CampaingsDto> addChannelToCampaign(int id, Map<String, dynamic> channelData) async {
     try {
       final token = await TokenService.instance.getToken();
-      print('🔍 [DEBUG] Token obtenido para agregar channel: ${token.isNotEmpty ? "Token presente" : "Token vacío"}');
-      print('🔍 [DEBUG] Agregando channel a campaña ID: $id');
-      print('🔍 [DEBUG] Channel data enviado: $channelData');
       
       final response = await http.patch(
         Uri.parse('${Endpoints.campaign}/$id/add-channel'),
@@ -215,20 +191,15 @@ class CampaignServices {
         },
       );
 
-      print('🔍 [DEBUG] Response status para addChannelToCampaign: ${response.statusCode}');
-      print('🔍 [DEBUG] Response body para addChannelToCampaign: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final updatedCampaign = CampaingsDto.fromJson(data);
-        print('✅ [DEBUG] Channel agregado exitosamente. Nuevos channels: ${updatedCampaign.channels.length}');
         return updatedCampaign;
       } else {
-        print('❌ [DEBUG] Error en addChannelToCampaign: Status ${response.statusCode}');
         throw Exception('Error al agregar canal: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('❌ [DEBUG] Error en addChannelToCampaign: $e');
       throw Exception('Error de conexión: $e');
     }
   }
@@ -237,7 +208,6 @@ class CampaignServices {
   Future<List<Map<String, dynamic>>> getCampaignGoals(int id) async {
     try {
       final token = await TokenService.instance.getToken();
-      print('🎯 [CampaignService] getCampaignGoals - ID: $id');
 
       final response = await http.get(
         Uri.parse('${Endpoints.campaign}/$id/goals'),
@@ -247,9 +217,6 @@ class CampaignServices {
         },
       ).timeout(const Duration(seconds: 15));
 
-      print('🎯 [CampaignService] getCampaignGoals response - Status: ${response.statusCode}');
-      print('🎯 [CampaignService] getCampaignGoals response - Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.cast<Map<String, dynamic>>();
@@ -257,7 +224,6 @@ class CampaignServices {
         throw Exception('Error al obtener objetivos: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ [CampaignService] Error en getCampaignGoals: $e');
       throw Exception('Error de conexión: $e');
     }
   }
@@ -270,8 +236,6 @@ class CampaignServices {
         throw Exception('Token de autenticación no encontrado');
       }
 
-      print('📺 [CampaignService] getCampaignChannels - ID: $id');
-      
       final response = await http.get(
         Uri.parse('${Endpoints.campaign}/$id/channels'),
         headers: {
@@ -280,9 +244,6 @@ class CampaignServices {
         },
       ).timeout(const Duration(seconds: 15));
 
-      print('📺 [CampaignService] getCampaignChannels response - Status: ${response.statusCode}');
-      print('📺 [CampaignService] getCampaignChannels response - Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.cast<Map<String, dynamic>>();
@@ -290,7 +251,6 @@ class CampaignServices {
         throw Exception('Error al obtener canales: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ [CampaignService] Error en getCampaignChannels: $e');
       throw Exception('Error de conexión: $e');
     }
   }
