@@ -5,4 +5,5 @@ class Endpoints {
   static const String animal = '$baseUrl/bovines';
   static const String stable = '$baseUrl/stables';
   static const String vaccine = '$baseUrl/vaccines';
+  static const String campaign = '$baseUrl/campaign';
 }

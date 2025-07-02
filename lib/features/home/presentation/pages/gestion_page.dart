@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:vacapp/features/vaccines/presentation/pages/vaccines_page.dart';
 import 'package:vacapp/features/vaccines/data/repositories/vaccines_repository.dart';
 import 'package:vacapp/features/vaccines/data/datasources/vaccines_services.dart';
+import 'package:vacapp/features/campaings/presentation/pages/campaign_management_page.dart';
 
 class GestionPage extends StatefulWidget {
   const GestionPage({super.key});
@@ -130,11 +131,20 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     _loadVaccinatedCount();
   }
 
+  Future<void> _navigateToCampaigns() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CampaignManagementPage(),
+      ),
+    );
+  }
+
   void _handleOptionTap(String action) {
     HapticFeedback.mediumImpact();
     switch (action) {
       case 'campaigns':
-        print('Navegando a Campañas');
+        _navigateToCampaigns();
         break;
       case 'vaccines':
         _navigateToVaccines();
