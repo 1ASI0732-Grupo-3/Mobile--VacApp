@@ -105,24 +105,29 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [primaryColor, primaryColor.withOpacity(0.8)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: primaryColor.withOpacity(0.3),
-                  blurRadius: 10,
+                  blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Contenido principal del header
                 Expanded(
@@ -145,32 +150,46 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
                   ),
                 ),
 
-                // Botón logout
-                GestureDetector(
-                  onTap: _logout,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade400, Colors.red.shade600],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                // Botón logout con diseño mejorado
+                Container(
+                  margin: const EdgeInsets.only(left: 12),
+                  child: GestureDetector(
+                    onTap: _logout,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.red.shade400, Colors.red.shade600],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: const Text(
-                      'Salir',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.logout_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            'Salir',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -186,32 +205,82 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
   Widget _buildWelcomeMode(bool isLoading, String username) {
     return Row(
       key: const ValueKey('welcome_mode'),
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: isLoading
-              ? SizedBox(
-                  key: const ValueKey('loading'),
-                  width: 80,
-                  height: 16,
-                  child: LinearProgressIndicator(
-                    backgroundColor: lightGreen.withOpacity(0.5),
-                    color: accentColor,
-                  ),
-                )
-              : Text(
-                  'Bienvenido, $username ',
-                  key: const ValueKey('username'),
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+        // Avatar container with improved styling
+        Container(
+          height: 42,
+          width: 42,
+          padding: const EdgeInsets.all(0),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: const Icon(
+              Icons.person_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
         ),
-        const Text(' 👋', style: TextStyle(fontSize: 18)),
+        const SizedBox(width: 14),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: isLoading
+                ? SizedBox(
+                    key: const ValueKey('loading'),
+                    width: 80,
+                    height: 16,
+                    child: LinearProgressIndicator(
+                      backgroundColor: lightGreen.withOpacity(0.5),
+                      color: accentColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Bienvenido',
+                            key: const ValueKey('welcome'),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withOpacity(0.85),
+                              height: 1.1,
+                            ),
+                          ),       
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        username,
+                        key: const ValueKey('username'),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          height: 1.1,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+          ),
+        ),
       ],
     );
   }
@@ -219,26 +288,52 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
   Widget _buildTitleMode() {
     return Row(
       key: const ValueKey('title_mode'),
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          height: 44,
+          width: 44,
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
-            Icons.dashboard,
+            Icons.dashboard_rounded,
             color: Colors.white,
-            size: 20,
+            size: 24,
           ),
         ),
         const SizedBox(width: 12),
-        const Text(
-          'Control General',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'VacApp',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withOpacity(0.9),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Control General',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.2,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ],
