@@ -57,14 +57,14 @@ class _AlertStatsCardState extends State<AlertStatsCard>
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFE65100), Color(0xFFFF8A65)],
+                colors: [Color(0xFFB71C1C), Color(0xFFE57373)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFE65100).withValues(alpha: 0.25),
+                  color: const Color(0xFFB71C1C).withOpacity(0.25),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -90,11 +90,11 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.warning_rounded,
+                            Icons.notifications_active,
                             color: Colors.white,
                             size: 24,
                           ),
@@ -117,7 +117,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                                 '${widget.statistics.animalsWithoutVaccines} animales necesitan vacunación',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.white.withValues(alpha: 0.9),
+                                  color: Colors.white.withOpacity(0.9),
                                 ),
                               ),
                             ],
@@ -135,7 +135,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -167,7 +167,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: Colors.white.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
@@ -177,7 +177,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                               children: [
                                 Icon(
                                   Icons.list_alt,
-                                  color: Colors.white.withValues(alpha: 0.9),
+                                  color: Colors.white.withOpacity(0.9),
                                   size: 16,
                                 ),
                                 const SizedBox(width: 8),
@@ -186,7 +186,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white.withValues(alpha: 0.9),
+                                    color: Colors.white.withOpacity(0.9),
                                   ),
                                 ),
                               ],
@@ -202,7 +202,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                                       width: 4,
                                       height: 4,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.7),
+                                        color: Colors.white.withOpacity(0.7),
                                         borderRadius: BorderRadius.circular(2),
                                       ),
                                     ),
@@ -212,21 +212,21 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                                         '${animal.name} (ID: ${animal.id})',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.white.withValues(alpha: 0.85),
+                                          color: Colors.white.withOpacity(0.85),
                                         ),
                                       ),
                                     ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.2),
+                                        color: Colors.white.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         animal.breed,
                                         style: TextStyle(
                                           fontSize: 9,
-                                          color: Colors.white.withValues(alpha: 0.9),
+                                          color: Colors.white.withOpacity(0.9),
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -243,7 +243,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                                   '+${widget.statistics.animalsWithoutVaccinesList.length - 3} animales más...',
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: Colors.white.withOpacity(0.7),
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
@@ -256,14 +256,14 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.info_outline,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: Colors.white.withOpacity(0.8),
                             size: 16,
                           ),
                           const SizedBox(width: 8),
@@ -272,7 +272,7 @@ class _AlertStatsCardState extends State<AlertStatsCard>
                               'Toca para ver el estado completo de vacunación',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white.withValues(alpha: 0.8),
+                                color: Colors.white.withOpacity(0.8),
                               ),
                             ),
                           ),

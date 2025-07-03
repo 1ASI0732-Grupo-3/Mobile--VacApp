@@ -36,6 +36,11 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
   int _activeCampaignsCount = 0;
   bool _isLoadingCampaigns = true;
 
+  // Para contar empleados en campaña
+  late StaffRepository _staffRepository;
+  int _staffInCampaignCount = 0;
+  bool _isLoadingStaff = true;
+
   // Paleta institucional consistente
   static const Color primary = Color(0xFF00695C);
   static const Color lightGreen = Color(0xFFE8F5E8);
@@ -62,7 +67,7 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
       'subtitle': 'Administración de personal',
       'icon': Icons.people_outline,
       'gradient': [const Color(0xFF00796B), const Color(0xFF00695C)],
-      'badge': '8 activos',
+      'badge': _isLoadingStaff ? 'Cargando...' : '$_staffInCampaignCount en campaña',
       'action': 'employees',
     },
   ];
@@ -74,6 +79,7 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     // Inicializar repositorios
     _repository = VaccinesRepository(VaccinesService());
     _campaignRepository = CampaignRepository(CampaignServices());
+    _staffRepository = StaffRepository(StaffService());
     
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -106,6 +112,7 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     _slideController.forward();
     _loadVaccinatedCount();
     _loadActiveCampaignsCount();
+    _loadStaffInCampaignCount();
   }
 
   @override
@@ -161,6 +168,31 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     }
   }
 
+  Future<void> _loadStaffInCampaignCount() async {
+    try {
+      final staffList = await _staffRepository.getAllStaffs();
+      if (mounted) {
+        // Contar solo los empleados en campaña (status 2)
+        final staffInCampaign = staffList.where((staff) => 
+          staff.employeeStatus == 2
+        ).length;
+        
+        setState(() {
+          _staffInCampaignCount = staffInCampaign;
+          _isLoadingStaff = false;
+        });
+      }
+    } catch (e) {
+      print('❌ [DEBUG] Error loading staff count: $e');
+      if (mounted) {
+        setState(() {
+          _staffInCampaignCount = 0;
+          _isLoadingStaff = false;
+        });
+      }
+    }
+  }
+
   Future<void> _navigateToVaccines() async {
     await Navigator.push(
       context,
@@ -195,6 +227,8 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
         ),
       ),
     );
+    // Recargar el conteo cuando regrese de la página de empleados
+    _loadStaffInCampaignCount();
   }
 
   void _handleOptionTap(String action) {

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vacapp/features/home/presentation/blocs/statistics_bloc.dart';
-import 'package:vacapp/features/home/presentation/widgets/statistics_widget.dart';
 import 'package:vacapp/features/home/presentation/widgets/welcome_header.dart';
+import 'package:vacapp/features/home/presentation/widgets/campaigns_overview_widget.dart';
+import 'package:vacapp/features/home/presentation/widgets/staff_overview_widget.dart';
+import 'package:vacapp/features/home/presentation/widgets/vaccines_overview_widget.dart';
+import 'package:vacapp/features/home/presentation/widgets/stables_overview_widget.dart';
+import 'package:vacapp/features/home/presentation/widgets/animals_overview_widget.dart';
+import 'package:vacapp/features/home/presentation/widgets/alert_stats_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -38,8 +43,80 @@ class _HomePageState extends State<HomePage> {
                     // Espacio para el header flotante
                     const SizedBox(height: 130),
                     
-                    // Widget de estadísticas
-                    const StatisticsWidget(),
+                    // Panel de alertas y estadísticas
+                    BlocBuilder<StatisticsBloc, StatisticsState>(
+                      builder: (context, state) {
+                        if (state is StatisticsLoading) {
+                          return Container(
+                            margin: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Center(
+                              child: Column(
+                                children: [
+                                  CircularProgressIndicator(),
+                                  SizedBox(height: 16),
+                                  Text('Cargando estadísticas...'),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else if (state is StatisticsError) {
+                          return Container(
+                            margin: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.red.shade200),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(Icons.error_outline, 
+                                     color: Colors.red.shade400, 
+                                     size: 48),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Error al cargar estadísticas: ${state.message}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.red.shade700),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else if (state is StatisticsLoaded) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              children: [
+                                // Panel de alerta rojo
+                                AlertStatsCard(statistics: state.statistics),
+                                
+                                
+                                // Panel de animales
+                                const AnimalsOverviewWidget(),
+                              ],
+                            ),
+                          );
+                        } 
+                        return const SizedBox(height: 20);
+                      },
+                    ),
+                    
+                    // Widget de campañas
+                    const CampaignsOverviewWidget(),
+                    
+                    // Widget de personal
+                    const StaffOverviewWidget(),
+                    
+                    // Widget de vacunas
+                    const VaccinesOverviewWidget(),
+                    
+                    // Widget de establos
+                    const StablesOverviewWidget(),
                     
                     // Espacio suficiente para evitar superposición con navigation bar
                     const SizedBox(height: 120),
