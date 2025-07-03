@@ -857,9 +857,9 @@ class _StaffCardState extends State<StaffCard> {
   Future<void> _handleDelete(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => BlocProvider.value(
-        value: context.read<StaffBloc>(),
-        child: DeleteStaffDialog(staff: widget.staff),
+      builder: (dialogContext) => DeleteStaffDialog(
+        staff: widget.staff,
+        staffBloc: context.read<StaffBloc>(),
       ),
     );
     
