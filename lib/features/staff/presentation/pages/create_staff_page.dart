@@ -113,6 +113,14 @@ class _CreateStaffViewState extends State<CreateStaffView> {
     super.dispose();
   }
 
+  String _formatDate(DateTime date) {
+    final months = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<StaffBloc, StaffState>(
@@ -368,24 +376,27 @@ class _CreateStaffViewState extends State<CreateStaffView> {
                                       // Dropdown compacto
                                       Container(
                                         constraints: const BoxConstraints(
-                                          minHeight: 50,
+                                          minHeight: 60,
                                         ),
                                         decoration: BoxDecoration(
-                                          border: Border.all(color: Colors.grey.shade300),
-                                          borderRadius: BorderRadius.circular(12),
-                                          color: lightBackground,
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                            width: 1,
+                                          ),
+                                          color: Colors.white,
                                         ),
                                         child: DropdownButtonFormField<CampaingsDto>(
                                           value: _selectedCampaign,
                                           isExpanded: true,
-                                          menuMaxHeight: 200,
-                                          isDense: true,
+                                          menuMaxHeight: 250,
+                                          isDense: false,
                                           hint: Container(
                                             padding: const EdgeInsets.symmetric(vertical: 4),
                                             child: const Text(
-                                              'Selecciona una campaña',
+                                              'Seleccione una campaña',
                                               style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 16,
                                                 color: Colors.grey,
                                               ),
                                             ),
@@ -393,70 +404,75 @@ class _CreateStaffViewState extends State<CreateStaffView> {
                                           selectedItemBuilder: (BuildContext context) {
                                             return _campaigns.map((campaign) {
                                               return Container(
-                                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                                alignment: Alignment.centerLeft,
                                                 child: Text(
-                                                  'Campaña Seleccionada',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
+                                                  'Campaña seleccionada: ${campaign.name}',
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.w600,
-                                                    color: primary,
+                                                    color: Colors.black87,
                                                   ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 1,
                                                 ),
                                               );
                                             }).toList();
                                           },
                                           decoration: InputDecoration(
                                             prefixIcon: Container(
-                                              margin: const EdgeInsets.all(8),
-                                              padding: const EdgeInsets.all(8),
-                                              decoration: BoxDecoration(
-                                                color: accent.withOpacity(0.1),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: const Icon(
-                                                Icons.campaign,
-                                                color: accent,
-                                                size: 20,
+                                              margin: const EdgeInsets.only(left: 12, right: 8),
+                                              child: Icon(
+                                                Icons.business_center,
+                                                color: Colors.orange.shade600,
+                                                size: 22,
                                               ),
                                             ),
-                                            border: InputBorder.none,
-                                            contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 12,
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                              borderSide: BorderSide.none,
                                             ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                              borderSide: BorderSide(color: primary, width: 2),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.transparent,
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                                           ),
-                                          dropdownColor: cardBackground,
+                                          dropdownColor: Colors.white,
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                           icon: Container(
                                             margin: const EdgeInsets.only(right: 12),
                                             child: Icon(
-                                              Icons.keyboard_arrow_down,
-                                              color: accent,
-                                              size: 24,
+                                              Icons.keyboard_arrow_down_rounded,
+                                              color: Colors.grey.shade600,
+                                              size: 28,
                                             ),
                                           ),
                                           items: _campaigns.map((campaign) {
                                             return DropdownMenuItem<CampaingsDto>(
                                               value: campaign,
                                               child: Container(
-                                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                                                constraints: const BoxConstraints(
-                                                  maxHeight: 50,
-                                                ),
+                                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                                 child: Row(
                                                   children: [
                                                     Container(
-                                                      padding: const EdgeInsets.all(4),
+                                                      width: 8,
+                                                      height: 8,
                                                       decoration: BoxDecoration(
-                                                        color: accent.withOpacity(0.1),
-                                                        borderRadius: BorderRadius.circular(4),
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.campaign,
-                                                        color: accent,
-                                                        size: 12,
+                                                        color: Colors.orange.shade600,
+                                                        shape: BoxShape.circle,
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 8),
+                                                    const SizedBox(width: 12),
                                                     Expanded(
                                                       child: Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,30 +482,24 @@ class _CreateStaffViewState extends State<CreateStaffView> {
                                                             campaign.name,
                                                             style: const TextStyle(
                                                               fontWeight: FontWeight.w600,
-                                                              fontSize: 13,
+                                                              fontSize: 14,
+                                                              color: Colors.black87,
                                                             ),
-                                                            maxLines: 1,
                                                             overflow: TextOverflow.ellipsis,
+                                                            maxLines: 1,
                                                           ),
-                                                          if (campaign.description.isNotEmpty)
-                                                            Text(
-                                                              campaign.description,
-                                                              style: TextStyle(
-                                                                fontSize: 10,
-                                                                color: Colors.grey.shade600,
-                                                              ),
-                                                              maxLines: 1,
-                                                              overflow: TextOverflow.ellipsis,
+                                                          const SizedBox(height: 2),
+                                                          Text(
+                                                            'ID: ${campaign.id} • ${_formatDate(campaign.startDate)} - ${_formatDate(campaign.endDate)}',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Colors.grey.shade600,
+                                                              fontWeight: FontWeight.w500,
                                                             ),
+                                                            overflow: TextOverflow.ellipsis,
+                                                            maxLines: 1,
+                                                          ),
                                                         ],
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      width: 6,
-                                                      height: 6,
-                                                      decoration: BoxDecoration(
-                                                        color: _getStatusColor(campaign.status),
-                                                        shape: BoxShape.circle,
                                                       ),
                                                     ),
                                                   ],
@@ -710,34 +720,148 @@ class _CreateStaffViewState extends State<CreateStaffView> {
 
                             // Información del estado (solo informativo)
                             Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                border: Border.all(color: Colors.blue.shade200),
-                                borderRadius: BorderRadius.circular(12),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.blue.shade50,
+                                    Colors.blue.shade100,
+                                  ],
+                                ),
+                                border: Border.all(
+                                  color: Colors.blue.shade200,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.work,
-                                    color: Colors.blue.shade600,
-                                    size: 20,
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade100,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.work_outline,
+                                          color: Colors.blue.shade700,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Estado del Nuevo Personal',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.blue.shade800,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Se asignará automáticamente',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.blue.shade600,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade200,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          'POR DEFECTO',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.blue.shade800,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 12),
-                                  const Text(
-                                    'Estado: En Campaña',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.blue,
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.blue.shade100,
+                                        width: 1,
+                                      ),
                                     ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    'Por defecto',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 16,
+                                              height: 16,
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.shade100,
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: Colors.blue,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Container(
+                                                  width: 8,
+                                                  height: 8,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.blue,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            const Text(
+                                              'En Campaña',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'El empleado está trabajando actualmente en la campaña asignada y cumpliendo sus funciones. Este será el estado inicial del nuevo personal.',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade700,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],

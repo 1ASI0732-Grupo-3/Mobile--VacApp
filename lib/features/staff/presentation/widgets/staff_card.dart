@@ -5,7 +5,6 @@ import 'package:vacapp/features/staff/data/models/staff_dto.dart';
 import 'package:vacapp/features/staff/presentation/bloc/staff_bloc.dart';
 import 'package:vacapp/features/staff/presentation/bloc/staff_event.dart';
 import 'package:vacapp/features/staff/presentation/pages/update_staff_page.dart';
-import 'package:vacapp/features/staff/presentation/pages/delete_staff_page.dart';
 import 'package:vacapp/features/campaings/data/repositories/campaign_repository.dart';
 import 'package:vacapp/features/campaings/data/datasources/campaign_services.dart';
 
@@ -31,7 +30,6 @@ class _StaffCardState extends State<StaffCard> {
   // Paleta de colores moderna de la app
   static const Color primary = Color(0xFF00695C);
   static const Color accent = Color(0xFF26A69A);
-  static const Color warning = Color(0xFFFF9800);
   static const Color cardBackground = Colors.white;
 
   @override
@@ -235,209 +233,23 @@ class _StaffCardState extends State<StaffCard> {
 
                 const SizedBox(height: 16),
 
-                // 2. Información de la campaña mejorada
+                // 2. Información de la campaña mejorada o mensaje de vacaciones
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.05),
+                    color: widget.staff.employeeStatus == 3 
+                        ? Colors.orange.withOpacity(0.05)
+                        : accent.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: accent.withOpacity(0.2)),
+                    border: Border.all(
+                      color: widget.staff.employeeStatus == 3 
+                          ? Colors.orange.withOpacity(0.2)
+                          : accent.withOpacity(0.2),
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: accent,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.campaign,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Campaña Asignada',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: accent.withOpacity(0.8),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                if (isLoadingCampaign)
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 12,
-                                        height: 12,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(accent),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Cargando...',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                else
-                                  Text(
-                                    campaignName ?? 'Sin campaña',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      // Días de trabajo destacados (debajo de la campaña)
-                      if (!isLoadingCampaign && campaignDays != null && campaignDays! > 0) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                warning.withOpacity(0.1),
-                                warning.withOpacity(0.15),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: warning.withOpacity(0.3), width: 1.5),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: warning,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.schedule,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'DURACIÓN',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: warning.withOpacity(0.7),
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                    Text(
-                                      '$campaignDays días de trabajo',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: warning,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      
-                      // Fechas de la campaña
-                      if (!isLoadingCampaign && campaignStartDate != null && campaignEndDate != null) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Inicio',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _formatDate(campaignStartDate!),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: 1,
-                              height: 25,
-                              color: Colors.grey.shade300,
-                              margin: const EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Fin',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _formatDate(campaignEndDate!),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
+                  child: widget.staff.employeeStatus == 3
+                      ? _buildVacationMessage()
+                      : _buildCampaignInfo(),
                 ),
 
                 const SizedBox(height: 16),
@@ -581,6 +393,9 @@ class _StaffCardState extends State<StaffCard> {
   
 
   void _showControlPanel(BuildContext context) {
+    // Capturar el StaffBloc antes de mostrar el BottomSheet
+    final staffBloc = context.read<StaffBloc>();
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -707,7 +522,7 @@ class _StaffCardState extends State<StaffCard> {
                       child: InkWell(
                         onTap: () {
                           Navigator.pop(context);
-                          _handleEdit(context);
+                          _handleEditFromPanel(staffBloc);
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(
@@ -768,7 +583,7 @@ class _StaffCardState extends State<StaffCard> {
                       child: InkWell(
                         onTap: () {
                           Navigator.pop(context);
-                          _handleDelete(context);
+                          _handleDeleteFromPanel(staffBloc);
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(
@@ -837,12 +652,12 @@ class _StaffCardState extends State<StaffCard> {
     );
   }
 
-  Future<void> _handleEdit(BuildContext context) async {
+  Future<void> _handleEditFromPanel(StaffBloc staffBloc) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => BlocProvider.value(
-          value: context.read<StaffBloc>(),
+          value: staffBloc,
           child: UpdateStaffPage(staff: widget.staff),
         ),
       ),
@@ -850,22 +665,505 @@ class _StaffCardState extends State<StaffCard> {
     
     // Recargar la lista si se editó el empleado exitosamente
     if (result == true) {
-      context.read<StaffBloc>().add(LoadStaffs());
+      staffBloc.add(LoadStaffs());
     }
   }
 
-  Future<void> _handleDelete(BuildContext context) async {
+  Future<void> _handleDeleteFromPanel(StaffBloc staffBloc) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => DeleteStaffDialog(
-        staff: widget.staff,
-        staffBloc: context.read<StaffBloc>(),
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.85,
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header compacto y moderno
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.red.shade600,
+                        Colors.red.shade700,
+                      ],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.delete_forever_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Eliminación Permanente',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              'Esta acción no se puede deshacer',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Contenido principal
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Pregunta principal
+                      Text(
+                        '¿Estás seguro de eliminar este empleado?',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Información del empleado compacta
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [primary, accent],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _getInitials(widget.staff.name),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.staff.name.isNotEmpty ? widget.staff.name : 'Sin nombre',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'ID: ${widget.staff.id}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(widget.staff.employeeStatus).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: _getStatusColor(widget.staff.employeeStatus).withOpacity(0.3),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _getStatusIcon(widget.staff.employeeStatus),
+                                        size: 14,
+                                        color: _getStatusColor(widget.staff.employeeStatus),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _getStatusText(widget.staff.employeeStatus),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: _getStatusColor(widget.staff.employeeStatus),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _getStatusDescription(widget.staff.employeeStatus),
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color: _getStatusColor(widget.staff.employeeStatus).withOpacity(0.8),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Advertencia para empleados en campaña
+                      if (widget.staff.employeeStatus == 2 && widget.staff.campaignId > 0) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.campaign_rounded,
+                                color: Colors.orange.shade600,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Empleado en campaña activa ${widget.staff.campaignId}. Su eliminación puede afectar operaciones.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.orange.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Advertencia principal compacta
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.warning_rounded,
+                              color: Colors.red.shade600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Se eliminarán todos los datos asociados: historial, registros y asignaciones.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.red.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Botones de acción modernos
+                      Row(
+                        children: [
+                          // Botón Cancelar
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => Navigator.of(dialogContext).pop(false),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.close_rounded,
+                                        color: Colors.grey.shade600,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Cancelar',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade700,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          
+                          // Botón Eliminar
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.red.shade500, Colors.red.shade600],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.red.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.of(dialogContext).pop(true);
+                                    staffBloc.add(DeleteStaff(id: widget.staff.id));
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.delete_forever_rounded,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Eliminar',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
     
     // Recargar la lista si se eliminó el empleado exitosamente
     if (result == true) {
-      context.read<StaffBloc>().add(LoadStaffs());
+      staffBloc.add(LoadStaffs());
+    }
+  }
+
+  // Método alternativo para eliminar (por si se necesita en el futuro)
+  // ignore: unused_element
+  Future<void> _handleDelete(BuildContext context) async {
+    final staffBloc = context.read<StaffBloc>();
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.warning,
+                color: Colors.red,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Eliminar Personal',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '¿Estás seguro de que deseas eliminar a ${widget.staff.name}?',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Esta acción no se puede deshacer.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(true);
+              staffBloc.add(DeleteStaff(id: widget.staff.id));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+    
+    // Recargar la lista si se eliminó el empleado exitosamente
+    if (result == true) {
+      staffBloc.add(LoadStaffs());
     }
   }
 
@@ -1210,6 +1508,263 @@ class _StaffCardState extends State<StaffCard> {
     );
   }
 
+  // Método para construir el mensaje de vacaciones
+  Widget _buildVacationMessage() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.beach_access,
+              color: Colors.orange,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Personal en Vacaciones',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade800,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.orange.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Colors.orange.shade700,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Concluirá al volver de sus vacaciones la campaña',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.orange.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Método para construir la información de campaña (diseño original)
+  Widget _buildCampaignInfo() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.campaign,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Campaña Asignada',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: accent.withOpacity(0.8),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (isLoadingCampaign)
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(accent),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Cargando...',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      campaignName ?? 'Sin campaña',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        
+        // Días de trabajo destacados (debajo de la campaña)
+        if (!isLoadingCampaign && campaignDays != null && campaignDays! > 0) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.orange.withOpacity(0.1),
+                  Colors.orange.withOpacity(0.15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.orange.withOpacity(0.3), width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.schedule,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DURACIÓN',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.orange.withOpacity(0.7),
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      Text(
+                        '$campaignDays días de trabajo',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        
+        // Fechas de la campaña
+        if (!isLoadingCampaign && campaignStartDate != null && campaignEndDate != null) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Inicio',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDate(campaignStartDate!),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 25,
+                color: Colors.grey.shade300,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Fin',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDate(campaignEndDate!),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   String _generateQRData() {
     final qrData = {
       'employee_id': widget.staff.id,
@@ -1270,5 +1825,18 @@ class _StaffCardState extends State<StaffCard> {
       campaignId: 0,
     );
     return tempStaff.employeeStatusString;
+  }
+
+  String _getStatusDescription(int status) {
+    switch (status) {
+      case 1:
+        return 'Puede trabajar en otra campaña';
+      case 2:
+        return 'Trabajando en campaña actual';
+      case 3:
+        return 'Retomará trabajo al volver';
+      default:
+        return 'Estado no definido';
+    }
   }
 }
