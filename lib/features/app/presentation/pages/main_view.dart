@@ -142,9 +142,11 @@ class _MainViewState extends State<MainView> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFFF8F9FA),
-              lightGreen.withOpacity(0.3),
+              const Color(0xFFFAFAFA),
+              const Color(0xFFF5F7F6),
+              lightGreen.withOpacity(0.08),
             ],
+            stops: const [0.0, 0.7, 1.0],
           ),
         ),
         child: Stack(
@@ -168,58 +170,38 @@ class _MainViewState extends State<MainView> {
               child: bodyKeyed,
             ),
 
-            /// ⬇️ Menú de navegación flotante con estilo futurista
+            /// ⬇️ Menú de navegación flotante con estilo suave
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    // Fondo futurista con gradiente verde claro
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.95),
-                        lightGreen.withOpacity(0.9),
-                        const Color(0xFFE0F2F1).withOpacity(0.95), // Verde mint claro
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                    // Efectos de sombra futuristas en verde
+                    // Fondo más suave con transparencia
+                    color: Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(28),
+                    // Sombras más sutiles
                     boxShadow: [
-                      // Sombra principal con efecto de levitación verde
+                      // Sombra principal suave
                       BoxShadow(
-                        color: primary.withOpacity(0.3),
-                        blurRadius: 30,
-                        offset: const Offset(0, 15),
-                        spreadRadius: 5,
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                        spreadRadius: 0,
                       ),
-                      // Resplandor neon verde
+                      // Borde interno luminoso
                       BoxShadow(
-                        color: const Color(0xFF4CAF50).withOpacity(0.6),
-                        blurRadius: 15,
-                        offset: const Offset(0, 0),
-                        spreadRadius: 2,
-                      ),
-                      // Sombra secundaria verde suave
-                      BoxShadow(
-                        color: const Color(0xFF81C784).withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                      // Sombra profunda para separación
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 25,
-                        offset: const Offset(0, 10),
+                        color: Colors.white.withOpacity(0.9),
+                        blurRadius: 1,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 1),
                       ),
                     ],
-                    // Borde futurista verde
+                    // Borde elegante
                     border: Border.all(
-                      color: primary.withOpacity(0.4),
-                      width: 2.0,
+                      color: Colors.white.withOpacity(0.8),
+                      width: 1.0,
                     ),
                   ),
                   child: Row(
@@ -228,72 +210,49 @@ class _MainViewState extends State<MainView> {
                       bool isSelected = selectedIndex == index;
                       return GestureDetector(
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          HapticFeedback.selectionClick();
                           setState(() {
                             selectedIndex = index;
                           });
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
                           decoration: BoxDecoration(
-                            // Fondo futurista verde para ítem seleccionado
-                            gradient: isSelected ? LinearGradient(
-                              colors: [
-                                const Color(0xFF4CAF50), // Verde vibrante
-                                primary, // Verde principal de la app
-                                const Color(0xFF2E7D32), // Verde más oscuro
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ) : null,
-                            color: !isSelected ? Colors.transparent : null,
-                            borderRadius: BorderRadius.circular(35),
-                            // Efectos de resplandor verde para ítem seleccionado
+                            // Fondo suave para ítem seleccionado
+                            color: isSelected 
+                                ? primary.withOpacity(0.9)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(20),
+                            // Sombra sutil solo para el elemento seleccionado
                             boxShadow: isSelected ? [
                               BoxShadow(
-                                color: const Color(0xFF4CAF50).withOpacity(0.5),
-                                blurRadius: 15,
-                                offset: const Offset(0, 0),
-                                spreadRadius: 2,
-                              ),
-                              BoxShadow(
-                                color: primary.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                                color: primary.withOpacity(0.2),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                                spreadRadius: 0,
                               ),
                             ] : null,
-                            // Borde con resplandor verde claro
-                            border: isSelected ? Border.all(
-                              color: lightGreen.withOpacity(0.8),
-                              width: 1.5,
-                            ) : null,
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 _menuItems[index]['icon'],
-                                color: isSelected ? Colors.white : primary.withOpacity(0.8),
-                                size: isSelected ? 26 : 24,
+                                color: isSelected ? Colors.white : primary.withOpacity(0.7),
+                                size: isSelected ? 24 : 22,
                               ),
                               if (isSelected)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 8),
                                   child: Text(
                                     _menuItems[index]['label'],
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                      letterSpacing: 0.5,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 1),
-                                          blurRadius: 2,
-                                        ),
-                                      ],
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      letterSpacing: 0.3,
                                     ),
                                   ),
                                 )
