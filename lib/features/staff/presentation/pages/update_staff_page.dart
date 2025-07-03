@@ -36,6 +36,7 @@ class _UpdateStaffViewState extends State<UpdateStaffView> {
   late final TextEditingController _nameController;
   late final TextEditingController _campaignIdController;
   late String _selectedStatus;
+  late BuildContext _mainContext; // Para mantener el contexto principal
 
   static const Color primary = Color(0xFF00695C);
   static const Color lightGreen = Color(0xFFE8F5E8);
@@ -46,6 +47,12 @@ class _UpdateStaffViewState extends State<UpdateStaffView> {
     _nameController = TextEditingController(text: widget.staff.name);
     _campaignIdController = TextEditingController(text: widget.staff.campaignId.toString());
     _selectedStatus = widget.staff.employeeStatusString;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mainContext = context; // Capturar el contexto principal
   }
 
   @override
@@ -483,7 +490,7 @@ class _UpdateStaffViewState extends State<UpdateStaffView> {
         campaignId: int.parse(_campaignIdController.text.trim()),
       );
       
-      context.read<StaffBloc>().add(
+      _mainContext.read<StaffBloc>().add(
         UpdateStaff(
           id: widget.staff.id,
           staff: updatedStaff,

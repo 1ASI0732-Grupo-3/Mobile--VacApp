@@ -18,152 +18,189 @@ class StaffPage extends StatelessWidget {
 class StaffView extends StatelessWidget {
   const StaffView({super.key});
 
-  // Colores consistentes con la app
-  static const Color primary = Color(0xFF00695C);
-  static const Color lightGreen = Color(0xFFE8F5E8);
+  // Paleta de colores más moderna
+  static const Color primary = Color(0xFF2C3E50);
+  static const Color accent = Color(0xFF3498DB);
+  static const Color lightBackground = Color(0xFFF8F9FA);
+  static const Color cardBackground = Colors.white;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: lightBackground,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFFF8F9FA),
-              lightGreen.withOpacity(0.3),
+              lightBackground,
+              lightBackground.withOpacity(0.8),
             ],
           ),
         ),
-        child: CustomScrollView(
-          slivers: [
-            // App Bar personalizada
-            SliverAppBar(
-              expandedHeight: 120,
-              floating: false,
-              pinned: true,
-              backgroundColor: primary,
-              flexibleSpace: FlexibleSpaceBar(
-                title: const Text(
-                  'Gestión de Personal',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header mejorado
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                decoration: BoxDecoration(
+                  color: cardBackground,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [primary, primary.withOpacity(0.8)],
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: primary),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.people,
-                      size: 60,
-                      color: Colors.white24,
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: accent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.people,
+                        color: accent,
+                        size: 24,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Personal',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                          Text(
+                            'Gestión de empleados',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              actions: [
-                BlocBuilder<StaffBloc, StaffState>(
-                  builder: (context, state) {
-                    return IconButton(
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      onPressed: () {
-                        context.read<StaffBloc>().add(LoadStaffs());
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
-
-            // Contenido principal
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: BlocConsumer<StaffBloc, StaffState>(
-                listener: (context, state) {
-                  if (state is StaffError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                  if (state is StaffOperationSuccess) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state is StaffLoading) {
-                    return const SliverFillRemaining(
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(primary),
+              
+              // Contenido principal
+              Expanded(
+                child: BlocConsumer<StaffBloc, StaffState>(
+                  listener: (context, state) {
+                    if (state is StaffError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
                         ),
-                      ),
-                    );
-                  }
-
-                  if (state is StaffLoaded) {
-                    if (state.staffs.isEmpty) {
-                      return SliverFillRemaining(
-                        child: Center(
+                      );
+                    }
+                    if (state is StaffOperationSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.green,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is StaffLoading) {
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(accent),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'Cargando empleados...',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    
+                    if (state is StaffError) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(24),
+                                padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Colors.red.shade50,
                                   borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primary.withOpacity(0.1),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
                                 ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.people_outline,
-                                      size: 64,
-                                      color: Colors.grey.shade400,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'No hay personal registrado',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Agrega el primer miembro del personal',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey.shade500,
-                                      ),
-                                    ),
-                                  ],
+                                child: Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Colors.red.shade300,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                'Error al cargar empleados',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                state.message,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey.shade600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 32),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  context.read<StaffBloc>().add(LoadStaffs());
+                                },
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Reintentar'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: accent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
                               ),
                             ],
@@ -171,51 +208,102 @@ class StaffView extends StatelessWidget {
                         ),
                       );
                     }
-
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
+                    
+                    if (state is StaffLoaded) {
+                      if (state.staffs.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: accent.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Icon(
+                                    Icons.people_outline,
+                                    size: 80,
+                                    color: accent.withOpacity(0.7),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  'No hay empleados registrados',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Agrega el primer empleado usando el botón +',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      
+                      return ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: state.staffs.length,
+                        itemBuilder: (context, index) {
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.only(bottom: 16),
                             child: StaffCard(staff: state.staffs[index]),
                           );
                         },
-                        childCount: state.staffs.length,
-                      ),
-                    );
-                  }
-
-                  return const SliverFillRemaining(
-                    child: Center(
+                      );
+                    }
+                    
+                    return const Center(
                       child: Text('Estado desconocido'),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BlocProvider.value(
-                value: context.read<StaffBloc>(),
-                child: const CreateStaffPage(),
-              ),
-            ),
-          );
-          
-          // Recargar la lista si se creó un empleado exitosamente
-          if (result == true) {
-            context.read<StaffBloc>().add(LoadStaffs());
-          }
-        },
-        backgroundColor: primary,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _navigateToCreateStaff(context),
+        backgroundColor: accent,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Agregar',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
+  }
+
+  void _navigateToCreateStaff(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<StaffBloc>(),
+          child: const CreateStaffPage(),
+        ),
+      ),
+    );
+    
+    // Recargar la lista si se creó un empleado exitosamente
+    if (result == true) {
+      context.read<StaffBloc>().add(LoadStaffs());
+    }
   }
 }

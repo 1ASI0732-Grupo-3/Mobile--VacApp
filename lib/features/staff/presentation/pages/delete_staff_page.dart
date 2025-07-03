@@ -266,10 +266,12 @@ class DeleteStaffDialog extends StatelessWidget {
 
   IconData _getStatusIcon(int status) {
     switch (status) {
-      case 1:
+      case 1: // Disponible
         return Icons.check_circle;
-      case 0:
-        return Icons.cancel;
+      case 2: // En Campaña
+        return Icons.work;
+      case 3: // Vacaciones
+        return Icons.beach_access;
       default:
         return Icons.help;
     }
@@ -277,10 +279,12 @@ class DeleteStaffDialog extends StatelessWidget {
 
   Color _getStatusColor(int status) {
     switch (status) {
-      case 1:
+      case 1: // Disponible
         return Colors.green;
-      case 0:
-        return Colors.red;
+      case 2: // En Campaña
+        return Colors.blue;
+      case 3: // Vacaciones
+        return Colors.orange;
       default:
         return Colors.grey;
     }
@@ -289,9 +293,11 @@ class DeleteStaffDialog extends StatelessWidget {
   String _getStatusText(int status) {
     switch (status) {
       case 1:
-        return 'Activo';
-      case 0:
-        return 'Inactivo';
+        return 'Disponible';
+      case 2:
+        return 'En Campaña';
+      case 3:
+        return 'Vacaciones';
       default:
         return 'Desconocido';
     }

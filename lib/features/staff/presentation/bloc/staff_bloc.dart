@@ -32,6 +32,11 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     try {
       emit(StaffCreating());
       
+      print('🔄 Creating staff with:');
+      print('  - name: ${event.name}');
+      print('  - employeeStatus: ${event.employeeStatus}');
+      print('  - campaignId: ${event.campaignId}');
+      
       final newStaff = StaffDto(
         id: 0, // El backend asignará el ID
         name: event.name,
@@ -39,13 +44,28 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
         campaignId: event.campaignId,
       );
 
-      await _staffRepository.createStaff(newStaff);
-      emit(StaffOperationSuccess(message: 'Staff creado exitosamente'));
+      final createdStaff = await _staffRepository.createStaff(newStaff);
+      print('✅ Staff created successfully: ${createdStaff.id}');
+      
+      emit(StaffOperationSuccess(message: 'Personal creado exitosamente'));
       
       // Recargar la lista
       add(LoadStaffs());
     } catch (e) {
-      emit(StaffError(message: 'Error al crear staff: $e'));
+      print('❌ Error creating staff: $e');
+      String errorMessage = 'Error al crear el personal';
+      
+      if (e.toString().contains('FormatException')) {
+        errorMessage = 'Error de formato en la respuesta del servidor';
+      } else if (e.toString().contains('SocketException')) {
+        errorMessage = 'Error de conexión con el servidor';
+      } else if (e.toString().contains('TimeoutException')) {
+        errorMessage = 'Tiempo de espera agotado';
+      } else if (e.toString().contains('Exception:')) {
+        errorMessage = e.toString().replaceFirst('Exception: ', '');
+      }
+      
+      emit(StaffError(message: errorMessage));
     }
   }
 

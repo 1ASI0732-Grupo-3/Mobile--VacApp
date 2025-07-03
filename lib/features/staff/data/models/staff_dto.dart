@@ -61,11 +61,11 @@ class StaffDto {
   // Métodos helper para employeeStatus
   String get employeeStatusString {
     switch (employeeStatus) {
-      case 0:
-        return 'Disponible';
       case 1:
-        return 'En Campaña';
+        return 'Disponible';
       case 2:
+        return 'En Campaña';
+      case 3:
         return 'Vacaciones';
       default:
         return 'Desconocido';
@@ -75,15 +75,15 @@ class StaffDto {
   static int employeeStatusFromString(String status) {
     switch (status.toLowerCase()) {
       case 'disponible':
-        return 0;
+        return 1;
       case 'en campaña':
       case 'en_campaña':
       case 'campaña':
-        return 1;
-      case 'vacaciones':
         return 2;
+      case 'vacaciones':
+        return 3;
       default:
-        return 0; // Por defecto disponible
+        return 1; // Por defecto disponible
     }
   }
 
