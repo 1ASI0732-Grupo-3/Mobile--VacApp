@@ -22,6 +22,9 @@ class AnimalsOverviewWidget extends StatelessWidget {
     );
   }
 
+    static const Color primary = Color(0xFF00695C);
+    static const Color accent = Color(0xFF26A69A);
+
   Widget _buildLoadingState() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -82,13 +85,7 @@ class AnimalsOverviewWidget extends StatelessWidget {
   }
 
   Widget _buildAnimalsContent(BuildContext context, HomeStatistics statistics) {
-    // Datos ficticios para el panel de control
-    final Map<String, double> ageDistribution = {
-      'Menos de 1 año': 15.0,
-      '1-3 años': 45.0,
-      '4-7 años': 30.0,
-      'Más de 7 años': 10.0,
-    };
+
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
@@ -117,12 +114,16 @@ class AnimalsOverviewWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
+                    gradient: LinearGradient(
+                      colors: [primary, accent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.pets_rounded,
-                    color: Colors.green,
+                    color: Colors.white,
                     size: 24,
                   ),
                 ),
@@ -135,7 +136,7 @@ class AnimalsOverviewWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Color(0xFF00695C),
                       ),
                     ),
                     SizedBox(height: 4),
@@ -143,7 +144,7 @@ class AnimalsOverviewWidget extends StatelessWidget {
                       'Resumen y estadísticas',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.green.withOpacity(0.7),
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -180,91 +181,7 @@ class AnimalsOverviewWidget extends StatelessWidget {
             ),
           ),
 
-          // Distribución de edades
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.green.withOpacity(0.1),
-                width: 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Distribución por Edad',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...ageDistribution.entries.map((entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          entry.key,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.green.withOpacity(0.8),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 7,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Stack(
-                              children: [
-                                Container(
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                ),
-                                FractionallySizedBox(
-                                  widthFactor: entry.value / 100,
-                                  child: Container(
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.withOpacity(0.7),
-                                      borderRadius: BorderRadius.circular(3),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                '${entry.value.toStringAsFixed(1)}%',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.green.withOpacity(0.8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )).toList(),
-              ],
-            ),
-          ),
-          
+
           // Espacio al final
           const SizedBox(height: 20),
         ],

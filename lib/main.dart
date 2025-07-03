@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vacapp/core/services/token_service.dart';
 import 'package:vacapp/features/app/presentation/pages/main_view.dart';
 import 'package:vacapp/features/auth/presentation/blocs/auth_bloc.dart';
-import 'package:vacapp/features/auth/presentation/pages/login_page.dart';
+import 'package:vacapp/features/auth/presentation/pages/welcome_page.dart';
 import 'package:vacapp/features/auth/data/repositories/auth_repository.dart';
 import 'package:vacapp/features/auth/data/datasources/auth_service.dart';
 
@@ -29,7 +29,7 @@ class MainApp extends StatelessWidget {
     if (hasToken) {
       return const MainView();
     } else {
-      return const LoginPage();
+      return const WelcomePage();
     }
   }
 
@@ -54,7 +54,7 @@ class MainApp extends StatelessWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return snapshot.data ?? const LoginPage();
+            return snapshot.data ?? const WelcomePage();
           },
         ),
       ),

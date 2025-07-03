@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vacapp/core/services/token_service.dart';
-import '../../../../core/themes/color_palette.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
 import 'package:vacapp/core/widgets/island_notification.dart';
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -19,6 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _agreeToTerms = false;
 
   void _saveToken(String token, String username) async {
     await TokenService.instance.saveUserSession(token, username);
@@ -27,110 +28,249 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorPalette.secondaryColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is SuccessAuthState) {
-                  _saveToken(state.user.token, state.user.username);
-                  IslandNotification.showSuccess(
-                    context,
-                    message: '¡Registro exitoso! Bienvenido',
-                  );
-                  Navigator.pop(context); // Vuelve al login
-                }
-                if (state is FailureState) {
-                  IslandNotification.showError(
-                    context,
-                    message: 'Error: ${state.errorMessage}',
-                  );
-                }
-              },
-              builder: (context, state) {
-                return Column(
+      backgroundColor: Color(0xFF00695C),
+      resizeToAvoidBottomInset: true,
+      body: Column(
+        children: [
+          // Imagen superior
+          SafeArea(
+            bottom: false,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24.0),
+              child: Center(
+                child: Image.asset(
+                  'assets/images/register.png',
+                  height: 180,
+                ),
+              ),
+            ),
+          ),
+
+          // Contenedor inferior
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
                   children: [
-                    const SizedBox(height: 20),
-                    Image.asset(
-                      'assets/images/vacapp_logo.png',
-                      height: 200,
-                      width: 200,
-                    ),
-                    _customInput(
-                      controller: _nameController,
-                      hint: "Nombre de usuario",
-                      icon: Icons.person_outline,
-                    ),
-                    _customInput(
-                      controller: _emailController,
-                      hint: "Email",
-                      icon: Icons.email_outlined,
-                    ),
-                    _customInput(
-                      controller: _passwordController,
-                      hint: "Contraseña",
-                      icon: Icons.lock_outline,
-                      obscure: !_isVisible,
-                      suffix: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _isVisible = !_isVisible;
-                          });
+                    // Sección fija (Título, campos, botón)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      child: BlocConsumer<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          if (state is SuccessAuthState) {
+                            _saveToken(state.user.token, state.user.username);
+                            IslandNotification.showSuccess(
+                              context,
+                              message: '¡Registro exitoso! Bienvenido',
+                            );
+                            Navigator.pop(context);
+                          }
+                          if (state is FailureState) {
+                            IslandNotification.showError(
+                              context,
+                              message: 'Error: ${state.errorMessage}',
+                            );
+                          }
                         },
-                        icon: Icon(
-                          _isVisible ? Icons.visibility : Icons.visibility_off,
-                          color: ColorPalette.primaryColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorPalette.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        onPressed: state is LoadingAuthState
-                            ? null
-                            : () {
-                                BlocProvider.of<AuthBloc>(context).add(
-                                  SignUpEvent(
-                                    username: _nameController.text.trim(),
-                                    password: _passwordController.text.trim(),
-                                    email: _emailController.text.trim(),
+                        builder: (context, state) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Crear tu Cuenta",
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF00695C),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                "Crea tu cuenta para comenzar tu viaje",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+
+                              _customInput(
+                                controller: _nameController,
+                                hint: "Nombre de usuario",
+                                icon: Icons.person_outline,
+                              ),
+                              const SizedBox(height: 20),
+
+                              _customInput(
+                                controller: _emailController,
+                                hint: "Email",
+                                icon: Icons.email_outlined,
+                              ),
+                              const SizedBox(height: 20),
+
+                              _customInput(
+                                controller: _passwordController,
+                                hint: "Contraseña",
+                                icon: Icons.lock_outline,
+                                obscure: !_isVisible,
+                                suffix: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isVisible = !_isVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _isVisible ? Icons.visibility : Icons.visibility_off,
+                                    color: Color(0xFF00695C),
                                   ),
-                                );
-                              },
-                        child: state is LoadingAuthState
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text("Registrarme", style: TextStyle(color: Colors.white)),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Checkbox(
+                                    value: _agreeToTerms,
+                                    activeColor: Color(0xFF00695C),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _agreeToTerms = value ?? false;
+                                      });
+                                    },
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 12),
+                                      child: RichText(
+                                        text: const TextSpan(
+                                          text: 'Acepto los ',
+                                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                                          children: [
+                                            TextSpan(
+                                              text: 'Términos & Condiciones',
+                                              style: TextStyle(
+                                                color: Color(0xFF00695C),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            TextSpan(text: ' y la '),
+                                            TextSpan(
+                                              text: 'Política de Privacidad',
+                                              style: TextStyle(
+                                                color: Color(0xFF00695C),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+
+                              SizedBox(
+                                width: double.infinity,
+                                height: 55,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _agreeToTerms
+                                        ? Color(0xFF00695C)
+                                        : Colors.grey.shade300,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: (state is LoadingAuthState || !_agreeToTerms)
+                                      ? null
+                                      : () {
+                                          BlocProvider.of<AuthBloc>(context).add(
+                                            SignUpEvent(
+                                              username: _nameController.text.trim(),
+                                              password: _passwordController.text.trim(),
+                                              email: _emailController.text.trim(),
+                                            ),
+                                          );
+                                        },
+                                  child: state is LoadingAuthState
+                                      ? const CircularProgressIndicator(color: Colors.white)
+                                      : Text(
+                                          "Crear Cuenta",
+                                          style: TextStyle(
+                                            color: _agreeToTerms
+                                                ? Colors.white
+                                                : Colors.grey.shade600,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 45),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        "Tengo una cuenta",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: ColorPalette.primaryColor,
-                        ),
+
+                    // Scroll para dispositivos con poco espacio o teclado
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: Container(), // Placeholder para mantener el scroll funcional
+                      ),
+                    ),
+
+                    // Texto fijo al fondo
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "¿Ya tienes una cuenta? ",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LoginPage()),
+                              );
+                            },
+                            child: const Text(
+                              "Iniciar Sesión",
+                              style: TextStyle(
+                                color: Color(0xFF00695C),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                );
-              },
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -142,29 +282,38 @@ class _RegisterPageState extends State<RegisterPage> {
     bool obscure = false,
     Widget? suffix,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        cursorColor: ColorPalette.primaryColor,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-          color: Colors.black,
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      cursorColor: Color(0xFF00695C),
+      style: const TextStyle(
+        fontWeight: FontWeight.w500,
+        fontSize: 16,
+        color: Colors.black87,
+      ),
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Color(0xFF00695C)),
+        suffixIcon: suffix,
+        hintText: hint,
+        hintStyle: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: 15,
+          color: Colors.grey.shade500,
         ),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.black),
-          suffixIcon: suffix,
-          hintText: hint,
-          hintStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          filled: true,
-          fillColor: ColorPalette.cream,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF00695C)),
         ),
       ),
     );

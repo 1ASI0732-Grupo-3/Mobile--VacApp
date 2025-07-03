@@ -218,7 +218,7 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
             Expanded(
               flex: 2,
               child: _buildStatCard(
-                'En Campaña',
+                'Campaña',
                 _inCampaignCount.toString(),
                 Icons.work,
                 Colors.blue,
@@ -359,7 +359,7 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
     final statusIcon = _getStatusIcon(staff.employeeStatus);
     final statusName = _getStatusName(staff.employeeStatus);
     
-    String _getInitials(String name) {
+    String getInitials(String name) {
       if (name.isEmpty) return '?';
       final words = name.split(' ');
       if (words.length == 1) {
@@ -392,7 +392,7 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
             ),
             child: Center(
               child: Text(
-                _getInitials(staff.name),
+                getInitials(staff.name),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,

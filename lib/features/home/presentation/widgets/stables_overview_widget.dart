@@ -209,7 +209,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildStatCard(
-                'Capacidad',
+                'Espacio',
                 _totalCapacity.toString(),
                 Icons.pets_rounded,
                 accent,
@@ -218,7 +218,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildStatCard(
-                'Disponible',
+                'Vacío',
                 _availableSpace.toString(),
                 Icons.check_circle_outline,
                 Colors.green,
@@ -274,7 +274,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'No hay datos de establos disponibles',
+                  'No hay datos de establos',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 14,
@@ -296,29 +296,24 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                color: color,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: color.withOpacity(0.8),
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: color.withOpacity(0.8),
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
           Text(
@@ -328,6 +323,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
               fontWeight: FontWeight.bold,
               color: color,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

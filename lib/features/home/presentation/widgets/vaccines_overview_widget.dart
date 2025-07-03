@@ -19,7 +19,6 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
   // Datos agrupados
   int _totalVaccines = 0;
   int _lastMonthVaccines = 0;
-  int _pendingVaccinations = 0;
   Map<String, int> _vaccineTypes = {};
 
   // Paleta de colores moderna
@@ -47,7 +46,6 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
         int lastMonthCount = 0;
         
         // Contar pendientes (podría ser una estimación basada en animales sin vacunar)
-        int pendingCount = 5; // Valor de ejemplo, idealmente esto vendría de la API
         
         for (final vaccine in vaccines) {
           // Contar por tipo
@@ -82,7 +80,6 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
 
           _totalVaccines = vaccines.length;
           _lastMonthVaccines = lastMonthCount;
-          _pendingVaccinations = pendingCount;
           _vaccineTypes = vaccineTypes;
           _isLoading = false;
         });
@@ -248,15 +245,7 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
                 const Color(0xFF26A69A),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatCard(
-                'Pendientes',
-                _pendingVaccinations.toString(),
-                Icons.pending_actions,
-                Colors.orange,
-              ),
-            ),
+            
           ],
         ),
 
@@ -320,7 +309,7 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'No hay datos de vacunas disponibles',
+                  'No hay datos de vacunas',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 14,

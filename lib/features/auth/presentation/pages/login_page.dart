@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vacapp/core/services/token_service.dart';
 import 'package:vacapp/features/app/presentation/pages/main_view.dart';
-import '../../../../core/themes/color_palette.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
@@ -27,97 +26,193 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorPalette.secondaryColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: BlocConsumer<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is SuccessAuthState) {
-                  _saveToken(state.user.token, state.user.username);                  // Navega a MainView y elimina el login del stack
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MainView()),
-                  );
-                }
-                if (state is FailureState) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.errorMessage)),
-                  );
-                }
-              },
-              builder: (context, state) {
-                return Column(
+      backgroundColor: Color(0xFF00695C), // Fondo verde en toda la pantalla
+      body: Column(
+        children: [
+          // Parte superior con logo - ahora más flexible
+          Expanded(
+            flex: 2,
+            child: SafeArea(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 20),
                     Image.asset(
-                      'assets/images/vacapp_logo.png',
+                      'assets/images/login.png',
                       height: 200,
-                      width: 200,
-                    ),
-                    _inputField(
-                      controller: _userOrEmailController,
-                      hint: "Usuario o Email",
-                      icon: Icons.person_outline,
-                      obscure: false,
-                      isPassword: false,
-                    ),
-                    _inputField(
-                      controller: _passwordController,
-                      hint: "Contraseña",
-                      icon: Icons.lock_outline,
-                      obscure: !_isVisible,
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorPalette.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        onPressed: state is LoadingAuthState
-                            ? null
-                            : () {
-                                BlocProvider.of<AuthBloc>(context).add(
-                                  LoginEvent(
-                                    usernameOrEmail: _userOrEmailController.text.trim(),
-                                    password: _passwordController.text.trim(),
-                                  ),
-                                );
-                              },
-                        child: state is LoadingAuthState
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text("Iniciar Sesión", style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                    const SizedBox(height: 45),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const RegisterPage()),
-                        );
-                      },
-                      child: const Text(
-                        "¿No tienes cuenta? Regístrate",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: ColorPalette.primaryColor,
-                        ),
-                      ),
+                      fit: BoxFit.contain,
                     ),
                   ],
-                );
-              },
+                ),
+              ),
             ),
           ),
-        ),
+
+          // Contenedor blanco con formulario en la parte inferior
+          Expanded(
+            flex: 3,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: BlocConsumer<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is SuccessAuthState) {
+                    _saveToken(state.user.token, state.user.username);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MainView()),
+                    );
+                  }
+                  if (state is FailureState) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.errorMessage),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        const Text(
+                          "¡Bienvenido de nuevo!",
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF00695C),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Ingresa tus credenciales para continuar",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        _inputField(
+                          controller: _userOrEmailController,
+                          hint: "Usuario o Email",
+                          icon: Icons.person_outline,
+                          obscure: false,
+                          isPassword: false,
+                        ),
+                        const SizedBox(height: 20),
+
+                        _inputField(
+                          controller: _passwordController,
+                          hint: "Contraseña",
+                          icon: Icons.lock_outline,
+                          obscure: !_isVisible,
+                          isPassword: true,
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              // Implementar recuperación
+                            },
+                            child: const Text(
+                              "¿Olvidaste tu contraseña?",
+                              style: TextStyle(
+                                color: Color(0xFF00695C),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF00695C),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 0,
+                            ),
+                            onPressed: state is LoadingAuthState
+                                ? null
+                                : () {
+                                    BlocProvider.of<AuthBloc>(context).add(
+                                      LoginEvent(
+                                        usernameOrEmail: _userOrEmailController.text.trim(),
+                                        password: _passwordController.text.trim(),
+                                      ),
+                                    );
+                                  },
+                            child: state is LoadingAuthState
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : const Text(
+                                    "Iniciar Sesión",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "¿No tienes cuenta? ",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const RegisterPage()),
+                                );
+                              },
+                              child: const Text(
+                                "Regístrate",
+                                style: TextStyle(
+                                  color: Color(0xFF00695C),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Agregar padding inferior para el SafeArea
+                        SizedBox(height: MediaQuery.of(context).padding.bottom),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -129,38 +224,46 @@ class _LoginPageState extends State<LoginPage> {
     required bool obscure,
     required bool isPassword,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        cursorColor: ColorPalette.primaryColor,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-          color: Colors.black,
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      cursorColor: Color(0xFF00695C),
+      style: const TextStyle(
+        fontWeight: FontWeight.w500,
+        fontSize: 16,
+        color: Colors.black87,
+      ),
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Color(0xFF00695C)),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _isVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Color(0xFF00695C),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isVisible = !_isVisible;
+                  });
+                },
+              )
+            : null,
+        hintText: hint,
+        hintStyle: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: 15,
+          color: Colors.grey.shade500,
         ),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.black),
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(_isVisible ? Icons.visibility : Icons.visibility_off, color: Colors.black),
-                  onPressed: () {
-                    setState(() {
-                      _isVisible = !_isVisible;
-                    });
-                  },
-                )
-              : null,
-          hintText: hint,
-          hintStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          filled: true,
-          fillColor: ColorPalette.cream,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF00695C)),
         ),
       ),
     );
