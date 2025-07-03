@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vacapp/features/vaccines/presentation/pages/vaccines_page.dart';
 import 'package:vacapp/features/vaccines/data/repositories/vaccines_repository.dart';
 import 'package:vacapp/features/vaccines/data/datasources/vaccines_services.dart';
 import 'package:vacapp/features/campaings/presentation/pages/campaign_management_page.dart';
 import 'package:vacapp/features/campaings/data/datasources/campaign_services.dart';
 import 'package:vacapp/features/campaings/data/repositories/campaign_repository.dart';
+import 'package:vacapp/features/staff/presentation/pages/staff_page.dart';
+import 'package:vacapp/features/staff/presentation/bloc/staff_bloc.dart';
+import 'package:vacapp/features/staff/presentation/bloc/staff_event.dart';
+import 'package:vacapp/features/staff/data/repositories/staff_repository.dart';
+import 'package:vacapp/features/staff/data/datasources/staff_service.dart';
 
 class GestionPage extends StatefulWidget {
   const GestionPage({super.key});
@@ -177,6 +183,20 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
     _loadActiveCampaignsCount();
   }
 
+  Future<void> _navigateToStaff() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) => StaffBloc(
+            StaffRepository(StaffService()),
+          )..add(LoadStaffs()),
+          child: const StaffPage(),
+        ),
+      ),
+    );
+  }
+
   void _handleOptionTap(String action) {
     HapticFeedback.mediumImpact();
     switch (action) {
@@ -187,7 +207,7 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
         _navigateToVaccines();
         break;
       case 'employees':
-        print('Navegando a Empleados');
+        _navigateToStaff();
         break;
     }
   }

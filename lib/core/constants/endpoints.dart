@@ -6,4 +6,5 @@ class Endpoints {
   static const String stable = '$baseUrl/stables';
   static const String vaccine = '$baseUrl/vaccines';
   static const String campaign = '$baseUrl/campaign';
+  static const String staff = '$baseUrl/staff';
 }
