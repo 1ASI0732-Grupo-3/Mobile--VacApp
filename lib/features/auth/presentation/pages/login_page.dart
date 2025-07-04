@@ -14,10 +14,63 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   bool _isVisible = false;
   final TextEditingController _userOrEmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    ));
+
+    // Start animations with safety check
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _fadeController.forward();
+        _slideController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
+    _userOrEmailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void _saveToken(String token, String username) async {
     await TokenService.instance.saveUserSession(token, username);
@@ -26,34 +79,42 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF00695C), // Fondo verde en toda la pantalla
+      backgroundColor: Color(0xFF00695C),
       body: Column(
         children: [
-          // Parte superior con logo - ahora más flexible
+          // Parte superior con logo - con animación de fade
           Expanded(
             flex: 2,
             child: SafeArea(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/login.png',
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Hero(
+                        tag: 'login_image',
+                        child: Image.asset(
+                          'assets/images/login.png',
+                          height: 200,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
 
-          // Contenedor blanco con formulario en la parte inferior
+          // Contenedor blanco con formulario - con animación desde abajo
           Expanded(
             flex: 3,
-            child: Container(
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               decoration: const BoxDecoration(
@@ -83,8 +144,10 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
                 builder: (context, state) {
-                  return SingleChildScrollView(
-                    child: Column(
+                  return FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SingleChildScrollView(
+                      child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 20),
@@ -207,11 +270,13 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: MediaQuery.of(context).padding.bottom),
                       ],
                     ),
+                    )
                   );
                 },
               ),
             ),
           ),
+            ),
         ],
       ),
     );

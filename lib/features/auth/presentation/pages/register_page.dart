@@ -14,12 +14,66 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMixin {
   bool _isVisible = false;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _agreeToTerms = false;
+
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    ));
+
+    // Start animations with safety check
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _fadeController.forward();
+        _slideController.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void _saveToken(String token, String username) async {
     await TokenService.instance.saveUserSession(token, username);
@@ -32,24 +86,34 @@ class _RegisterPageState extends State<RegisterPage> {
       resizeToAvoidBottomInset: true,
       body: Column(
         children: [
-          // Imagen superior
+          // Imagen superior - con animación de fade
           SafeArea(
             bottom: false,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              child: Center(
-                child: Image.asset(
-                  'assets/images/register.png',
-                  height: 180,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: Hero(
+                    tag: 'register_image',
+                    child: Image.asset(
+                      'assets/images/register.png',
+                      height: 180,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
 
-          // Contenedor inferior
+          // Contenedor inferior - con animación desde abajo
           Expanded(
-            child: Container(
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Container(
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -266,6 +330,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ],
+                ),
+              ),
                 ),
               ),
             ),
