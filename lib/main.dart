@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vacapp/core/services/token_service.dart';
+import 'package:vacapp/core/widgets/connectivity_wrapper.dart';
 import 'package:vacapp/features/app/presentation/pages/main_view.dart';
 import 'package:vacapp/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:vacapp/features/auth/presentation/pages/welcome_page.dart';
@@ -46,16 +47,18 @@ class MainApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: FutureBuilder<Widget>(
-          future: _getInitialPage(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            return snapshot.data ?? const WelcomePage();
-          },
+        home: ConnectivityWrapper(
+          child: FutureBuilder<Widget>(
+            future: _getInitialPage(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+              return snapshot.data ?? const WelcomePage();
+            },
+          ),
         ),
       ),
     );
