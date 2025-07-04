@@ -87,6 +87,39 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ),
                           );
+                        } else if (state is StatisticsOffline) {
+                          return Container(
+                            margin: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(Icons.wifi_off, 
+                                     color: Colors.grey.shade600, 
+                                     size: 48),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No hay WiFi',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Verifica tu conexión a internet para ver las estadísticas',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          );
                         } else if (state is StatisticsLoaded) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),

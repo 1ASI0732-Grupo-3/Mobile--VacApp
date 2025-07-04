@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vacapp/features/vaccines/data/repositories/vaccines_repository.dart';
 import 'package:vacapp/features/vaccines/data/datasources/vaccines_services.dart';
 import 'package:intl/intl.dart';
+import 'package:vacapp/core/services/connectivity_service.dart';
 
 class VaccinesOverviewWidget extends StatefulWidget {
   const VaccinesOverviewWidget({super.key});
@@ -12,6 +13,7 @@ class VaccinesOverviewWidget extends StatefulWidget {
 
 class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
   late VaccinesRepository _repository;
+  final ConnectivityService _connectivityService = ConnectivityService();
 
   bool _isLoading = true;
   String? _error;
@@ -33,6 +35,17 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
 
   Future<void> _loadVaccines() async {
     try {
+      // Verificar conectividad primero
+      if (!_connectivityService.isConnected) {
+        if (mounted) {
+          setState(() {
+            _error = 'No hay conexión de red';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
       final vaccines = await _repository.getVaccines();
       if (mounted) {
         // Procesar datos para estadísticas
@@ -87,7 +100,15 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Error al cargar vacunas';
+          // Verificar si es un error de conectividad
+          if (e.toString().contains('network') || 
+              e.toString().contains('connection') ||
+              e.toString().contains('internet') ||
+              !_connectivityService.isConnected) {
+            _error = 'No hay conexión de red';
+          } else {
+            _error = 'Error al cargar vacunas';
+          }
           _isLoading = false;
         });
       }
@@ -170,8 +191,10 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
 
             if (_isLoading)
               _buildLoadingState()
-            else if (_error != null)
+            else if (_error != null && !_error!.contains('network') && !_error!.contains('connection'))
               _buildErrorState()
+            else if (_error != null)
+              _buildOfflineState()
             else
               _buildVaccinesContent(),
           ],
@@ -212,6 +235,37 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
               _error!,
               style: TextStyle(
                 color: Colors.red.shade700,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfflineState() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.wifi_off,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'No hay WiFi',
+              style: TextStyle(
+                color: Colors.grey.shade700,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),

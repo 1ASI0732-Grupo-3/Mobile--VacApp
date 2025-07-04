@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vacapp/features/campaings/data/repositories/campaign_repository.dart';
 import 'package:vacapp/features/campaings/data/datasources/campaign_services.dart';
 import 'package:vacapp/features/campaings/data/models/campaings_dto.dart';
+import 'package:vacapp/core/services/connectivity_service.dart';
 
 class CampaignsOverviewWidget extends StatefulWidget {
   const CampaignsOverviewWidget({super.key});
@@ -12,6 +13,7 @@ class CampaignsOverviewWidget extends StatefulWidget {
 
 class _CampaignsOverviewWidgetState extends State<CampaignsOverviewWidget> {
   late CampaignRepository _repository;
+  final ConnectivityService _connectivityService = ConnectivityService();
   List<CampaingsDto> _campaigns = [];
   bool _isLoading = true;
   String? _error;
@@ -30,6 +32,17 @@ class _CampaignsOverviewWidgetState extends State<CampaignsOverviewWidget> {
 
   Future<void> _loadCampaigns() async {
     try {
+      // Verificar conectividad primero
+      if (!_connectivityService.isConnected) {
+        if (mounted) {
+          setState(() {
+            _error = 'No hay conexión de red';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
       final campaigns = await _repository.getAllCampaigns();
       if (mounted) {
         setState(() {
@@ -40,7 +53,15 @@ class _CampaignsOverviewWidgetState extends State<CampaignsOverviewWidget> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Error al cargar campañas';
+          // Verificar si es un error de conectividad
+          if (e.toString().contains('network') || 
+              e.toString().contains('connection') ||
+              e.toString().contains('internet') ||
+              !_connectivityService.isConnected) {
+            _error = 'No hay conexión de red';
+          } else {
+            _error = 'Error al cargar campañas';
+          }
           _isLoading = false;
         });
       }
@@ -134,8 +155,10 @@ class _CampaignsOverviewWidgetState extends State<CampaignsOverviewWidget> {
 
             if (_isLoading)
               _buildLoadingState()
-            else if (_error != null)
+            else if (_error != null && !_error!.contains('network') && !_error!.contains('connection'))
               _buildErrorState()
+            else if (_error != null)
+              _buildOfflineState()
             else
               _buildCampaignsContent(),
           ],
@@ -174,6 +197,37 @@ class _CampaignsOverviewWidgetState extends State<CampaignsOverviewWidget> {
               _error!,
               style: TextStyle(
                 color: Colors.red.shade700,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfflineState() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.wifi_off,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'No hay WiFi',
+              style: TextStyle(
+                color: Colors.grey.shade700,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),

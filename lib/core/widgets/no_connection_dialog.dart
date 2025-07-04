@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:vacapp/core/services/token_service.dart';
+import 'package:vacapp/features/animals/presentation/pages/offline_animals_page.dart';
 
 class NoConnectionDialog {
-  static void show(BuildContext context, {VoidCallback? onRetry}) {
+  static void show(BuildContext context, {VoidCallback? onRetry}) async {
+    // Verificar si hay datos offline disponibles
+    final hasOfflineData = await TokenService.instance.hasOfflineData();
+    
+    if (!context.mounted) return;
+    
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -84,6 +91,39 @@ class NoConnectionDialog {
                       ),
                     ),
                   ),
+                  
+                  // Mostrar botón "Ver datos guardados" solo si hay datos offline
+                  if (hasOfflineData) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF00695C), width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Navegar a la página de bovinos offline
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const OfflineAnimalsPage()),
+                          );
+                        },
+                        child: const Text(
+                          'Ver datos guardados',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF00695C),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

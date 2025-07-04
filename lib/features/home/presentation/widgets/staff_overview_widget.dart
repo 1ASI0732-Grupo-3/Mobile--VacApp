@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vacapp/features/staff/data/repositories/staff_repository.dart';
 import 'package:vacapp/features/staff/data/datasources/staff_service.dart';
 import 'package:vacapp/features/staff/data/models/staff_dto.dart';
+import 'package:vacapp/core/services/connectivity_service.dart';
 
 class StaffOverviewWidget extends StatefulWidget {
   const StaffOverviewWidget({super.key});
@@ -12,6 +13,7 @@ class StaffOverviewWidget extends StatefulWidget {
 
 class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
   late StaffRepository _repository;
+  final ConnectivityService _connectivityService = ConnectivityService();
   List<StaffDto> _staffList = [];
   bool _isLoading = true;
   String? _error;
@@ -30,6 +32,17 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
 
   Future<void> _loadStaff() async {
     try {
+      // Verificar conectividad primero
+      if (!_connectivityService.isConnected) {
+        if (mounted) {
+          setState(() {
+            _error = 'No hay conexión de red';
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
       final staffList = await _repository.getAllStaffs();
       if (mounted) {
         setState(() {
@@ -40,7 +53,15 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Error al cargar personal';
+          // Verificar si es un error de conectividad
+          if (e.toString().contains('network') || 
+              e.toString().contains('connection') ||
+              e.toString().contains('internet') ||
+              !_connectivityService.isConnected) {
+            _error = 'No hay conexión de red';
+          } else {
+            _error = 'Error al cargar personal';
+          }
           _isLoading = false;
         });
       }
@@ -159,8 +180,10 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
 
             if (_isLoading)
               _buildLoadingState()
-            else if (_error != null)
+            else if (_error != null && !_error!.contains('network') && !_error!.contains('connection'))
               _buildErrorState()
+            else if (_error != null)
+              _buildOfflineState()
             else
               _buildStaffContent(),
           ],
@@ -199,6 +222,37 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
               _error!,
               style: TextStyle(
                 color: Colors.red.shade700,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfflineState() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.wifi_off,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'No hay WiFi',
+              style: TextStyle(
+                color: Colors.grey.shade700,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),

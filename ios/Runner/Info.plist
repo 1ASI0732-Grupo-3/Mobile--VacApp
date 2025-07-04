@@ -45,6 +45,32 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Permisos para cámara y fotos -->
+	<key>NSCameraUsageDescription</key>
+	<string>VacApp necesita acceso a la cámara para tomar fotos de los bovinos y vacunas</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>VacApp necesita acceso a la galería de fotos para seleccionar imágenes de bovinos y vacunas</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>VacApp necesita acceso para guardar fotos en tu galería</string>
+	
+	<!-- Permisos para notificaciones -->
+	<key>NSUserNotificationUsageDescription</key>
+	<string>VacApp necesita enviar notificaciones para recordatorios de vacunación y alertas importantes</string>
+	
+	<!-- Permisos para ubicación (si se necesita en el futuro) -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>VacApp puede usar tu ubicación para asociar datos geográficos con los establos</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>VacApp puede usar tu ubicación para asociar datos geográficos con los establos</string>
+	
+	<!-- Permisos para micrófono (si se necesita grabación de notas de voz) -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>VacApp puede usar el micrófono para grabar notas de voz sobre los bovinos</string>
+	
+	<!-- Permisos para contactos (si se necesita compartir información) -->
+	<key>NSContactsUsageDescription</key>
+	<string>VacApp puede acceder a tus contactos para compartir información veterinaria</string>
 
 
 </dict>

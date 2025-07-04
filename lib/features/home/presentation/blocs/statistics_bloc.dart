@@ -5,6 +5,7 @@ import 'package:vacapp/features/animals/data/dataasources/animals_service.dart';
 import 'package:vacapp/features/stables/data/models/stable_dto.dart';
 import 'package:vacapp/features/vaccines/data/models/vaccines_dto.dart';
 import 'package:vacapp/features/animals/data/models/animal_dto.dart';
+import 'package:vacapp/core/services/connectivity_service.dart';
 
 // Events
 abstract class StatisticsEvent {
@@ -34,6 +35,10 @@ class StatisticsError extends StatisticsState {
   final String message;
 
   const StatisticsError(this.message);
+}
+
+class StatisticsOffline extends StatisticsState {
+  const StatisticsOffline();
 }
 
 // Data Model
@@ -252,14 +257,17 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
   final StablesService _stablesService;
   final VaccinesService _vaccinesService;
   final AnimalsService _animalsService;
+  final ConnectivityService _connectivityService;
 
   StatisticsBloc({
     StablesService? stablesService,
     VaccinesService? vaccinesService,
     AnimalsService? animalsService,
+    ConnectivityService? connectivityService,
   })  : _stablesService = stablesService ?? StablesService(),
         _vaccinesService = vaccinesService ?? VaccinesService(),
         _animalsService = animalsService ?? AnimalsService(),
+        _connectivityService = connectivityService ?? ConnectivityService(),
         super(StatisticsInitial()) {
     on<LoadStatistics>(_onLoadStatistics);
     on<RefreshStatistics>(_onRefreshStatistics);
@@ -283,6 +291,12 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
     try {
       emit(StatisticsLoading());
 
+      // Verificar conectividad primero
+      if (!_connectivityService.isConnected) {
+        emit(const StatisticsOffline());
+        return;
+      }
+
       // Cargar datos en paralelo
       final futures = await Future.wait([
         _stablesService.fetchStables(),
@@ -302,7 +316,15 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
 
       emit(StatisticsLoaded(statistics));
     } catch (e) {
-      emit(StatisticsError('Error al cargar las estadísticas: $e'));
+      // Si hay un error de conexión específico, mostrar estado offline
+      if (e.toString().contains('network') || 
+          e.toString().contains('connection') ||
+          e.toString().contains('internet') ||
+          !_connectivityService.isConnected) {
+        emit(const StatisticsOffline());
+      } else {
+        emit(StatisticsError('Error al cargar las estadísticas: $e'));
+      }
     }
   }
 }
