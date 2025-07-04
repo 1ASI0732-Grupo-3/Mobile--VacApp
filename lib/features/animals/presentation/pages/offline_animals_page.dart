@@ -121,7 +121,6 @@ class _OfflineAnimalsPageState extends State<OfflineAnimalsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         foregroundColor: primary,
         title: const Text(
           'Bovinos Guardados',
