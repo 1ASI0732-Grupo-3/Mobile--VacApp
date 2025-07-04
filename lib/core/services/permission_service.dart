@@ -1,6 +1,5 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 class PermissionService {
   static final PermissionService _instance = PermissionService._internal();
