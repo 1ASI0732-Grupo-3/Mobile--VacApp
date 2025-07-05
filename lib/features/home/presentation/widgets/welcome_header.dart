@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vacapp/core/services/token_service.dart';
 import 'package:vacapp/features/auth/presentation/pages/login_page.dart';
+import 'package:vacapp/features/auth/presentation/pages/profile_page.dart';
 
 class WelcomeHeader extends StatefulWidget {
   final ScrollController? scrollController;
@@ -19,9 +20,9 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
   late Future<String> _usernameFuture;
   bool _isScrolled = false;
 
-  static const Color primaryColor = Color(0xFF00695C);
-  static const Color lightGreen = Color(0xFFE8F5E8);
-  static const Color accentColor = Color(0xFF4CAF50);
+  static const Color primaryColor = Color(0xFF00897B); // Más vibrante
+  static const Color lightGreen = Color(0xFFD0F5E8); // Más claro
+  static const Color accentColor = Color(0xFF00BFA5); // Acento moderno
 
   @override
   void initState() {
@@ -90,6 +91,14 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
     }
   }
 
+  void _navigateToProfile() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ProfilePage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -105,23 +114,23 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primaryColor, primaryColor.withOpacity(0.8)],
+                colors: [primaryColor, Color(0xFF00695C)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
+                color: Colors.white.withOpacity(0.13),
+                width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: primaryColor.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: accentColor.withOpacity(0.18),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -150,47 +159,113 @@ class _WelcomeHeaderState extends State<WelcomeHeader> {
                   ),
                 ),
 
-                // Botón logout con diseño mejorado
+                // Dropdown de configuraciones con glassmorphism y diseño moderno
                 Container(
-                  margin: const EdgeInsets.only(left: 12),
-                  child: GestureDetector(
-                    onTap: _logout,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.red.shade400, Colors.red.shade600],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  margin: const EdgeInsets.only(left: 16),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      popupMenuTheme: PopupMenuThemeData(
+                        color: Colors.white, // Fondo sólido
+                        elevation: 16,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(
-                            Icons.logout_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            'Salir',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                    ),
+                    child: PopupMenuButton<String>(
+                      offset: const Offset(0, 60),
+                      elevation: 16,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      constraints: const BoxConstraints(minWidth: 170),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.07),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.settings_rounded,
+                          color: primaryColor,
+                          size: 22,
+                        ),
                       ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem<String>(
+                          value: 'profile',
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: lightGreen.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.person_rounded,
+                                  color: Color(0xFF00695C),
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              const Text(
+                                'Mi Perfil',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: Color(0xFF00695C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'logout',
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.logout_rounded,
+                                  color: Colors.red.shade600,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              const Text(
+                                'Cerrar Sesión',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'profile':
+                            _navigateToProfile();
+                            break;
+                          case 'logout':
+                            _logout();
+                            break;
+                        }
+                      },
                     ),
                   ),
                 ),
