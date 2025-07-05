@@ -132,9 +132,13 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
                             _saveToken(state.user.token, state.user.username);
                             IslandNotification.showSuccess(
                               context,
-                              message: '¡Registro exitoso! Bienvenido',
+                              message: '¡Registro exitoso! Ahora puedes iniciar sesión',
                             );
-                            Navigator.pop(context);
+                            // Navegar al login page después del registro exitoso
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginPage()),
+                            );
                           }
                           if (state is FailureState) {
                             IslandNotification.showError(

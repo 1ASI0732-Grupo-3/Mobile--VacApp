@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vacapp/core/services/user_api_service.dart';
-import 'package:flutter/services.dart';
 import 'package:vacapp/features/auth/presentation/pages/welcome_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -403,125 +402,319 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => WillPopScope(
-        onWillPop: () async => false, // Prevenir que se cierre con back button
-        child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: Colors.transparent,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 340),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header de éxito
-                Container(
-                  padding: const EdgeInsets.all(24),
+        onWillPop: () async => false,
+        child: TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 500),
+          tween: Tween(begin: 0.0, end: 1.0),
+          curve: Curves.elasticOut,
+          builder: (context, value, child) => Transform.scale(
+            scale: value,
+            child: Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: SingleChildScrollView(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 320, maxHeight: 600),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.green.shade400, Colors.green.shade600],
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 25,
+                        offset: const Offset(0, 12),
+                        spreadRadius: 3,
+                      ),
+                      BoxShadow(
+                        color: primary.withOpacity(0.15),
+                        blurRadius: 40,
+                        offset: const Offset(0, 0),
+                      ),
+                    ],
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      const SizedBox(height: 32),
+                      
+                      // Icono principal estilo isla
                       Container(
-                        width: 60,
-                        height: 60,
+                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              primary.withOpacity(0.9),
+                              primary,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primary.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                        child: const Icon(
-                          Icons.check_circle_outline,
-                          color: Colors.white,
-                          size: 32,
+                        child: Column(
+                          children: [
+                            // Icono animado
+                            TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 800),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.bounceOut,
+                              builder: (context, iconValue, child) => Transform.scale(
+                                scale: iconValue,
+                                child: Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.3),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // Título
+                            TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 600),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.easeOut,
+                              builder: (context, textValue, child) => Opacity(
+                                opacity: textValue,
+                                child: const Text(
+                                  '¡Cuenta Eliminada!',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            
+                            // Subtítulo
+                            TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 800),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.easeOut,
+                              builder: (context, subtitleValue, child) => Opacity(
+                                opacity: subtitleValue,
+                                child: Text(
+                                  'Proceso completado',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Cuenta Eliminada',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Proceso completado exitosamente',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              
-                // Contenido
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Tu cuenta ha sido eliminada permanentemente junto con todos los datos asociados.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
-                          fontSize: 15,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Gracias por usar VacApp. ¡Esperamos verte pronto!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
                     
-                      // Botón para ir al inicio
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade600,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      // Contenido compacto estilo isla
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            // Mensaje principal - estilo isla
+                            TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 1000),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.easeOut,
+                              builder: (context, contentValue, child) => Opacity(
+                                opacity: contentValue,
+                                child: Container(
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    color: lightGreen.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: primary.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: primary.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Icon(
+                                          Icons.info_outline_rounded,
+                                          color: primary,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Tu cuenta y datos han sido eliminados permanentemente.',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade800,
+                                            fontSize: 13,
+                                            height: 1.4,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          onPressed: () => _navigateToWelcome(),
-                          child: const Text(
-                            'Ir al Inicio',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Mensaje de despedida - estilo isla
+                            TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 1200),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.easeOut,
+                              builder: (context, farewellValue, child) => Opacity(
+                                opacity: farewellValue,
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.pink.shade50,
+                                        Colors.purple.shade50,
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: Colors.pink.shade200.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.pink.shade100,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.favorite_rounded,
+                                          color: Colors.pink.shade400,
+                                          size: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          '¡Gracias por usar VacApp!\nEsperamos verte pronto.',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade700,
+                                            fontSize: 12,
+                                            fontStyle: FontStyle.italic,
+                                            height: 1.3,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            
+                            const SizedBox(height: 24),
+                          
+                            // Botón estilo isla
+                            TweenAnimationBuilder<double>(
+                              duration: const Duration(milliseconds: 1400),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              curve: Curves.elasticOut,
+                              builder: (context, buttonValue, child) => Transform.scale(
+                                scale: buttonValue,
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        primary.withOpacity(0.9),
+                                        primary,
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: primary.withOpacity(0.4),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
+                                      onTap: () => _navigateToWelcome(),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 18),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: const Icon(
+                                                Icons.home_rounded,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            const Text(
+                                              'Ir al Inicio',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
