@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
               child: BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
-                  if (state is SuccessAuthState) {
+                  if (state is SuccessLoginState) {
                     _saveToken(state.user.token, state.user.username);
                     Navigator.pushReplacement(
                       context,

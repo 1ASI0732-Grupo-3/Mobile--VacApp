@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vacapp/core/services/token_service.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
-import 'package:vacapp/core/widgets/island_notification.dart';
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -75,8 +73,306 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
     super.dispose();
   }
 
-  void _saveToken(String token, String username) async {
-    await TokenService.instance.saveUserSession(token, username);
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  String? _validateForm() {
+    if (_nameController.text.trim().isEmpty) {
+      return 'El nombre de usuario es obligatorio';
+    }
+    if (_nameController.text.trim().length < 3) {
+      return 'El nombre de usuario debe tener al menos 3 caracteres';
+    }
+    if (_emailController.text.trim().isEmpty) {
+      return 'El email es obligatorio';
+    }
+    if (!_isValidEmail(_emailController.text.trim())) {
+      return 'Error de email: Por favor ingresa un email válido';
+    }
+    if (_passwordController.text.trim().isEmpty) {
+      return 'La contraseña es obligatoria';
+    }
+    if (_passwordController.text.trim().length < 6) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    return null;
+  }
+
+  String _getErrorMessage(String serverError) {
+    // Convertir errores del servidor a mensajes amigables
+    final errorLower = serverError.toLowerCase();
+    
+    if (errorLower.contains('email') && errorLower.contains('invalid')) {
+      return 'Error de email: Por favor ingresa un email válido';
+    } else if (errorLower.contains('email') && errorLower.contains('already')) {
+      return 'Este email ya está registrado. Intenta con otro email.';
+    } else if (errorLower.contains('username') && errorLower.contains('already')) {
+      return 'Este nombre de usuario ya existe. Intenta con otro.';
+    } else if (errorLower.contains('password') && errorLower.contains('weak')) {
+      return 'La contraseña es muy débil. Debe tener al menos 8 caracteres.';
+    } else if (errorLower.contains('required')) {
+      return 'Todos los campos son obligatorios.';
+    } else if (errorLower.contains('network') || errorLower.contains('connection')) {
+      return 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+    } else {
+      return 'Ha ocurrido un error inesperado. Intenta nuevamente.';
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 8,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.red.shade50.withOpacity(0.3),
+                ],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Ícono animado
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.red.shade400,
+                        Colors.red.shade600,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.shade200,
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Título
+                const Text(
+                  '¡Ups! Algo salió mal',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D3748),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                
+                // Mensaje de error
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: Colors.red.shade800,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Botón de acción
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00695C),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Entendido',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 8,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.green.shade50.withOpacity(0.3),
+                ],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Ícono animado
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.green.shade400,
+                        Colors.green.shade600,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.shade200,
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Título
+                const Text(
+                  '¡Registro Exitoso!',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D3748),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                
+                // Mensaje de éxito
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.green.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'Tu cuenta ha sido creada correctamente. Por favor, inicia sesión con tus credenciales para acceder a la aplicación.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: Colors.green.shade800,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Botón de acción
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Cerrar dialog
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        (route) => false, // Remover todas las rutas anteriores
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00695C),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Iniciar Sesión',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -128,23 +424,14 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                       child: BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
-                          if (state is SuccessAuthState) {
-                            _saveToken(state.user.token, state.user.username);
-                            IslandNotification.showSuccess(
-                              context,
-                              message: '¡Registro exitoso! Ahora puedes iniciar sesión',
-                            );
-                            // Navegar al login page después del registro exitoso
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => const LoginPage()),
-                            );
+                          if (state is SuccessRegisterState) {
+                            // NO guardar el token aquí para registro
+                            // El usuario debe hacer login después del registro
+                            _showSuccessDialog();
                           }
                           if (state is FailureState) {
-                            IslandNotification.showError(
-                              context,
-                              message: 'Error: ${state.errorMessage}',
-                            );
+                            final friendlyMessage = _getErrorMessage(state.errorMessage);
+                            _showErrorDialog(friendlyMessage);
                           }
                         },
                         builder: (context, state) {
@@ -265,6 +552,14 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
                                   onPressed: (state is LoadingAuthState || !_agreeToTerms)
                                       ? null
                                       : () {
+                                          // Validar formulario antes de enviarlo
+                                          final validationError = _validateForm();
+                                          if (validationError != null) {
+                                            _showErrorDialog(validationError);
+                                            return;
+                                          }
+
+                                          // Si la validación pasa, enviar el formulario
                                           BlocProvider.of<AuthBloc>(context).add(
                                             SignUpEvent(
                                               username: _nameController.text.trim(),

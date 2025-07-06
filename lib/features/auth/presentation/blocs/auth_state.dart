@@ -13,6 +13,16 @@ class SuccessAuthState extends AuthState {
   const SuccessAuthState({required this.user});
 }
 
+class SuccessLoginState extends AuthState {
+  final User user;
+  const SuccessLoginState({required this.user});
+}
+
+class SuccessRegisterState extends AuthState {
+  final User user;
+  const SuccessRegisterState({required this.user});
+}
+
 class FailureState extends AuthState {
   final String errorMessage;
   const FailureState({required this.errorMessage});

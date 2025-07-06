@@ -15,7 +15,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           usernameOrEmail: event.usernameOrEmail,
           password: event.password,
         );
-        emit(SuccessAuthState(user: user));
+        emit(SuccessLoginState(user: user));
       } catch (e) {
         emit(FailureState(errorMessage: e.toString()));
       }
@@ -29,7 +29,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           password: event.password,
           email: event.email,
         );
-        emit(SuccessAuthState(user: user));
+        emit(SuccessRegisterState(user: user));
       } catch (e) {
         emit(FailureState(errorMessage: e.toString()));
       }
