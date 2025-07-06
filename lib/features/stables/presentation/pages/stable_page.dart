@@ -1089,6 +1089,7 @@ class _StablePageState extends State<StablePage> with SingleTickerProviderStateM
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Header estilo "isla" compacto

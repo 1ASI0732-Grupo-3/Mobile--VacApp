@@ -273,6 +273,7 @@ class _VaccinesPageState extends State<VaccinesPage>
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               _buildModernHeader(),

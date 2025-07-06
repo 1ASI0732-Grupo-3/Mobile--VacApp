@@ -367,6 +367,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> with TickerProviderStat
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Header moderno

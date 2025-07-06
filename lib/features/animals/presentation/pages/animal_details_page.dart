@@ -107,6 +107,7 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Header moderno

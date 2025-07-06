@@ -1289,6 +1289,7 @@ class _AnimalPageState extends State<AnimalPage> {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: FutureBuilder<List<AnimalDto>>(
             future: _futureAnimals,
             builder: (context, snapshot) {

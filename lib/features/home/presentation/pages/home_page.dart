@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: backgroundColor,
         body: SafeArea(
+          bottom: false,
           child: Stack(
             children: [
               // Contenido principal con estadísticas

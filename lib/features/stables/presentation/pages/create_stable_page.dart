@@ -72,6 +72,7 @@ class _CreateStablePageState extends State<CreateStablePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),

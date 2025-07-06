@@ -40,6 +40,7 @@ class StaffView extends StatelessWidget {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Header mejorado

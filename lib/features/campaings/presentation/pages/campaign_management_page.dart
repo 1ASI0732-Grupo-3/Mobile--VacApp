@@ -146,6 +146,7 @@ class _CampaignManagementPageState extends State<CampaignManagementPage> {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: BlocProvider(
             create: (_) => _campaignBloc,
             child: BlocListener<CampaignBloc, CampaignState>(

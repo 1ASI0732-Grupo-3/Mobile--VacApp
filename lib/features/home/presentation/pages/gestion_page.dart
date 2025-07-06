@@ -262,6 +262,7 @@ class _GestionPageState extends State<GestionPage> with TickerProviderStateMixin
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(

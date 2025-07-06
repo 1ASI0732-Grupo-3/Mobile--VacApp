@@ -92,7 +92,8 @@ class _EditStablePageState extends State<EditStablePage> {
           ),
         ),
         child: SafeArea(
-        child: Column(
+          bottom: false,
+          child: Column(
           children: [
             // Header tipo isla mejorado
             Container(
@@ -502,9 +503,9 @@ class _EditStablePageState extends State<EditStablePage> {
               ),
             ),
           ],
+          ),
         ),
       ),
-    ),
     );
   }
 

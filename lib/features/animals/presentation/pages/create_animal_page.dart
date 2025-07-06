@@ -235,6 +235,7 @@ Future<void> _saveAnimal() async {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: Form(
             key: _formKey,
             child: Column(

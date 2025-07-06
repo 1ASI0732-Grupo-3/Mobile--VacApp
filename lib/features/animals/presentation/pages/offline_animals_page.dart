@@ -137,6 +137,7 @@ class _OfflineAnimalsPageState extends State<OfflineAnimalsPage> {
         ),
       ),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             // Header en formato isla

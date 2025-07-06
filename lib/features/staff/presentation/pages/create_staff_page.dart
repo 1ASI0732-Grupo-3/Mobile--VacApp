@@ -148,6 +148,7 @@ class _CreateStaffViewState extends State<CreateStaffView> {
       child: Scaffold(
         backgroundColor: lightBackground,
         body: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // Header moderno
