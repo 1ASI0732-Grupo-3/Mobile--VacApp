@@ -25,11 +25,13 @@ class _AnimalPageState extends State<AnimalPage> {
   late final VaccinesRepository _vaccinesRepository;
   late Future<List<AnimalDto>> _futureAnimals;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   List<AnimalDto> _allAnimals = [];
   List<AnimalDto> _filteredAnimals = [];
   List<StableDto> _stables = [];
   bool _stablesLoaded = false;
+  bool _showTitle = true;
   
   // Map para almacenar el conteo de vacunas por animal
   Map<int, int> _vaccineCountByAnimal = {};
@@ -43,6 +45,18 @@ class _AnimalPageState extends State<AnimalPage> {
     _searchController.addListener(_onSearchChanged);
     _loadStables();
     _loadVaccinesForAllAnimals();
+    
+    // Listener para controlar la visibilidad del título con animación ultra suave
+    _scrollController.addListener(() {
+      const threshold = 120.0; // Píxeles de scroll para ocultar el título (más gradual)
+      final shouldShowTitle = _scrollController.offset <= threshold;
+      
+      if (shouldShowTitle != _showTitle) {
+        setState(() {
+          _showTitle = shouldShowTitle;
+        });
+      }
+    });
   }
 
   Future<void> _loadStables() async {
@@ -68,6 +82,7 @@ class _AnimalPageState extends State<AnimalPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -1295,235 +1310,267 @@ class _AnimalPageState extends State<AnimalPage> {
 
               return Column(
                 children: [
-                  // Header moderno
-                  Container(
-                    margin: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primary.withOpacity(0.15),
-                          blurRadius: 25,
-                          offset: const Offset(0, 8),
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: lightGreen.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                      child: Row(
-                        children: [
-                          // Icono de la sección
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  primary.withOpacity(0.15),
-                                  accent.withOpacity(0.1),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.pets_rounded,
-                              color: primary,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          
-                          // Título y descripción
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Gestión de Bovinos',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: primary,
-                                  ),
-                                ),
-                                Text(
-                                  'Administra tu ganado bovino',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          // Contador de animales
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  lightGreen.withOpacity(0.8),
-                                  lightGreen.withOpacity(0.6),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: primary.withOpacity(0.2),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Total: ',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${_filteredAnimals.length}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Barra de búsqueda y botón de agregar
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
+                  // Header moderno con animación de ocultación ultra suave
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 800), // Duración más larga para suavidad
+                    curve: Curves.easeInOutCubicEmphasized, // Curva más suave y elegante
+                    height: _showTitle ? null : 0,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 700), // Fade más gradual
+                      curve: Curves.easeInOutQuint, // Curva muy suave para opacidad
+                      opacity: _showTitle ? 1.0 : 0.0,
+                      child: AnimatedScale(
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeInOutCubicEmphasized,
+                        scale: _showTitle ? 1.0 : 0.95, // Escala sutil
+                        child: AnimatedSlide(
+                          duration: const Duration(milliseconds: 800),
+                          curve: Curves.easeInOutCubicEmphasized,
+                          offset: _showTitle ? Offset.zero : const Offset(0, -0.2), // Deslizamiento más sutil
                           child: Container(
+                            margin: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primary.withOpacity(0.15),
+                                  blurRadius: 25,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                               border: Border.all(
                                 color: lightGreen.withOpacity(0.3),
                                 width: 1,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primary.withOpacity(0.08),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
                             ),
-                            child: TextField(
-                              controller: _searchController,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: "Buscar por nombre, raza o género...",
-                                hintStyle: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 14,
-                                ),
-                                prefixIcon: Container(
-                                  margin: const EdgeInsets.all(8),
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: primary.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                              child: Row(
+                                children: [
+                                  // Icono de la sección
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          primary.withOpacity(0.15),
+                                          accent.withOpacity(0.1),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.pets_rounded,
+                                      color: primary,
+                                      size: 24,
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.search_rounded,
-                                    color: primary,
-                                    size: 20,
+                                  const SizedBox(width: 16),
+                                  
+                                  // Título y descripción
+                                  const Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Gestión de Bovinos',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: primary,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Administra tu ganado bovino',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 16,
-                                ),
+                                  
+                                  // Contador de animales
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          lightGreen.withOpacity(0.8),
+                                          lightGreen.withOpacity(0.6),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: primary.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Total: ',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${_filteredAnimals.length}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                primary,
-                                primary.withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primary.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: _goToCreate,
+                      ),
+                    ),
+                  ),
+                  
+                  // Barra de búsqueda y botón de agregar con transición ultra suave
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 700), // Sincronizado con el header
+                    curve: Curves.easeInOutCubicEmphasized,
+                    margin: EdgeInsets.fromLTRB(20, _showTitle ? 0 : 20, 20, 0),
+                    child: AnimatedSlide(
+                      duration: const Duration(milliseconds: 700),
+                      curve: Curves.easeInOutCubicEmphasized,
+                      offset: _showTitle ? Offset.zero : const Offset(0, -0.1), // Movimiento más sutil
+                      child: AnimatedScale(
+                        duration: const Duration(milliseconds: 700),
+                        curve: Curves.easeInOutCubicEmphasized,
+                        scale: _showTitle ? 1.0 : 1.02, // Escala ligeramente hacia arriba
+                        child: Row(
+                          children: [
+                            Expanded(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.add_rounded,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Agregar',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: lightGreen.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primary.withOpacity(0.08),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 5),
                                     ),
                                   ],
                                 ),
+                                child: TextField(
+                                  controller: _searchController,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: "Buscar por nombre, raza o género...",
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 14,
+                                    ),
+                                    prefixIcon: Container(
+                                      margin: const EdgeInsets.all(8),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(
+                                        Icons.search_rounded,
+                                        color: primary,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 16),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    primary,
+                                    primary.withOpacity(0.8),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primary.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: _goToCreate,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.add_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Agregar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   
@@ -1532,6 +1579,7 @@ class _AnimalPageState extends State<AnimalPage> {
                   // Lista de animales
                   Expanded(
                     child: ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: _filteredAnimals.length,
                       itemBuilder: (context, index) {
