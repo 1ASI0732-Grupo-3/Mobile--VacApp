@@ -1089,134 +1089,195 @@ class _StablePageState extends State<StablePage> with SingleTickerProviderStateM
           ),
         ),
         child: SafeArea(
-        child: _isLoading
-            ? _buildLoadingAnimation()
-            : _stables.isEmpty
-                ? _buildEmptyState()
-                : RefreshIndicator(
-                    onRefresh: _refreshStables,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemCount: _stables.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: 48,
-                                  width: 48,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [primary, primary.withOpacity(0.8)],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: primary.withOpacity(0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: IconButton(
-                                    onPressed: _goToCreate,
-                                    icon: const Text(
-                                      '+',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+          child: Column(
+            children: [
+              // Header estilo "isla" compacto
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                      spreadRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Gestión de Establos',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: primary,
+                              letterSpacing: -0.3,
                             ),
-                          );
-                        }
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Administra tus espacios',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      height: 36,
+                      width: 36,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [primary, primary.withOpacity(0.8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primary.withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: _goToCreate,
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Contenido principal
+              Expanded(
+                child: _isLoading
+                    ? _buildLoadingAnimation()
+                    : _stables.isEmpty
+                        ? _buildEmptyState()
+                        : RefreshIndicator(
+                            onRefresh: _refreshStables,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              itemCount: _stables.length,
+                              itemBuilder: (context, index) {
+                                final stable = _stables[index];
+                                final bovinoCount = _bovinoCount[stable.id] ?? 0;
+                                final percentage = _animatedBovinoPercent[stable.id] ?? 0.0;
+                                final isAlmostFull = percentage >= 0.8; // 80% o más
+                                final isFull = percentage >= 1.0; // 100% o más
+                                final spacesLeft = stable.limit - bovinoCount;
+                                final isNearlyFull = spacesLeft <= 2 && spacesLeft > 0; // 1 o 2 espacios restantes
 
-                        final stable = _stables[index - 1];
-                        final bovinoCount = _bovinoCount[stable.id] ?? 0;
-                        final percentage = _animatedBovinoPercent[stable.id] ?? 0.0;
-                        final isAlmostFull = percentage >= 0.8; // 80% o más
-                        final isFull = percentage >= 1.0; // 100% o más
-                        final spacesLeft = stable.limit - bovinoCount;
-                        final isNearlyFull = spacesLeft <= 2 && spacesLeft > 0; // 1 o 2 espacios restantes
-
-                        return TweenAnimationBuilder<double>(
-                          duration: Duration(seconds: (isAlmostFull || isNearlyFull) ? 2 : 1),
-                          tween: Tween(begin: 0.98, end: (isAlmostFull || isNearlyFull) ? 1.02 : 1.0),
-                          builder: (context, scale, child) {
-                            return Transform.scale(
-                              scale: scale,
-                              child: AnimatedContainer(
-                                duration: Duration(milliseconds: (isAlmostFull || isNearlyFull) ? 600 : 300),
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: (isAlmostFull || isNearlyFull)
-                                      ? Border.all(
-                                          color: isFull ? Colors.red.shade300 : Colors.orange.shade300,
-                                          width: 2,
-                                        )
-                                      : null,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: (isAlmostFull || isNearlyFull)
-                                          ? (isFull ? Colors.red.withOpacity(0.2) : Colors.orange.withOpacity(0.2))
-                                          : Colors.black.withOpacity(0.1),
-                                      blurRadius: (isAlmostFull || isNearlyFull) ? 15 : 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header con icono, información del establo y botón de ver animales
-                              Row(
-                                children: [
-                                  // Icono del establo
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.home_work_outlined,
-                                      size: 24,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  // Información del establo
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          stable.name,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
-                                          ),
+                                return TweenAnimationBuilder<double>(
+                                  duration: Duration(seconds: (isAlmostFull || isNearlyFull) ? 2 : 1),
+                                  tween: Tween(begin: 0.98, end: (isAlmostFull || isNearlyFull) ? 1.02 : 1.0),
+                                  builder: (context, scale, child) {
+                                    return Transform.scale(
+                                      scale: scale,
+                                      child: AnimatedContainer(
+                                        duration: Duration(milliseconds: (isAlmostFull || isNearlyFull) ? 600 : 300),
+                                        padding: const EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(20), // Bordes más redondeados
+                                          border: (isAlmostFull || isNearlyFull)
+                                              ? Border.all(
+                                                  color: isFull ? Colors.red.shade300 : Colors.orange.shade300,
+                                                  width: 2,
+                                                )
+                                              : Border.all(
+                                                  color: Colors.grey.shade200, // Borde sutil siempre presente
+                                                  width: 1,
+                                                ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: (isAlmostFull || isNearlyFull)
+                                                  ? (isFull ? Colors.red.withOpacity(0.2) : Colors.orange.withOpacity(0.2))
+                                                  : Colors.black.withOpacity(0.08), // Sombra más sutil
+                                              blurRadius: (isAlmostFull || isNearlyFull) ? 15 : 12,
+                                              offset: const Offset(0, 6), // Sombra ligeramente más pronunciada
+                                              spreadRadius: 0,
+                                            ),
+                                            // Sombra adicional para más profundidad
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.04),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                              spreadRadius: 0,
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Establo ID: ${stable.id}',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey.shade600,
-                                          ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Header con icono, información del establo y botón de ver animales
+                                            Row(
+                                              children: [
+                                                // Icono del establo
+                                                Container(
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade100,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.home_work_outlined,
+                                                    size: 24,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 16),
+                                                // Información del establo
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        stable.name,
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Colors.black87,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        'Establo ID: ${stable.id}',
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.grey.shade600,
+                                                        ),
                                         ),
                                       ],
                                     ),
@@ -1425,13 +1486,21 @@ class _StablePageState extends State<StablePage> with SingleTickerProviderStateM
                                       height: 44,
                                       margin: const EdgeInsets.only(right: 8),
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: primary),
-                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: primary, width: 1.5),
+                                        borderRadius: BorderRadius.circular(12), // Bordes más redondeados
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: primary.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
                                       child: Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(12), // Consistente con el contenedor
                                           onTap: () => _goToEdit(stable),
                                           child: Center(
                                             child: Row(
@@ -1465,13 +1534,21 @@ class _StablePageState extends State<StablePage> with SingleTickerProviderStateM
                                       height: 44,
                                       margin: const EdgeInsets.only(left: 8),
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.red.shade400),
-                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.red.shade400, width: 1.5),
+                                        borderRadius: BorderRadius.circular(12), // Bordes más redondeados
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.red.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
                                       child: Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(12), // Consistente con el contenedor
                                           onTap: () => _goToDelete(stable),
                                           child: Center(
                                             child: Row(
@@ -1503,13 +1580,17 @@ class _StablePageState extends State<StablePage> with SingleTickerProviderStateM
                             ],
                           ),
                               ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
                     ),
+            
                   ),
                 ),
+            ],
+          ),
+        ),
       ),
     );
   }
