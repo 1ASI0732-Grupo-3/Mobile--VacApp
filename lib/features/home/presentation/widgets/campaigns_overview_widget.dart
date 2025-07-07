@@ -3,6 +3,7 @@ import 'package:vacapp/features/campaings/data/repositories/campaign_repository.
 import 'package:vacapp/features/campaings/data/datasources/campaign_services.dart';
 import 'package:vacapp/features/campaings/data/models/campaings_dto.dart';
 import 'package:vacapp/core/services/connectivity_service.dart';
+import 'package:vacapp/features/campaings/presentation/pages/campaign_management_page.dart';
 
 class CampaignsOverviewWidget extends StatefulWidget {
   const CampaignsOverviewWidget({super.key});
@@ -281,7 +282,12 @@ class _CampaignsOverviewWidgetState extends State<CampaignsOverviewWidget> {
               const Spacer(),
               TextButton(
                 onPressed: () {
-                  // Navegar a página de campañas
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CampaignManagementPage(),
+                    ),
+                  );
                 },
                 child: Text(
                   'Ver todas',

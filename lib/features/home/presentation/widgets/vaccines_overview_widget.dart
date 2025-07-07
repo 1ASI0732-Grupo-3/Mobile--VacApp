@@ -3,6 +3,7 @@ import 'package:vacapp/features/vaccines/data/repositories/vaccines_repository.d
 import 'package:vacapp/features/vaccines/data/datasources/vaccines_services.dart';
 import 'package:intl/intl.dart';
 import 'package:vacapp/core/services/connectivity_service.dart';
+import 'package:vacapp/features/vaccines/presentation/pages/vaccines_page.dart';
 
 class VaccinesOverviewWidget extends StatefulWidget {
   const VaccinesOverviewWidget({super.key});
@@ -320,7 +321,12 @@ class _VaccinesOverviewWidgetState extends State<VaccinesOverviewWidget> {
               const Spacer(),
               TextButton(
                 onPressed: () {
-                  // Navegar a página de vacunas
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VaccinesPage(),
+                    ),
+                  );
                 },
                 child: Text(
                   'Ver todas',

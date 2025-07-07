@@ -3,6 +3,10 @@ import 'package:vacapp/features/staff/data/repositories/staff_repository.dart';
 import 'package:vacapp/features/staff/data/datasources/staff_service.dart';
 import 'package:vacapp/features/staff/data/models/staff_dto.dart';
 import 'package:vacapp/core/services/connectivity_service.dart';
+import 'package:vacapp/features/staff/presentation/pages/staff_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vacapp/features/staff/presentation/bloc/staff_bloc.dart';
+import 'package:vacapp/features/staff/presentation/bloc/staff_event.dart';
 
 class StaffOverviewWidget extends StatefulWidget {
   const StaffOverviewWidget({super.key});
@@ -318,7 +322,15 @@ class _StaffOverviewWidgetState extends State<StaffOverviewWidget> {
               const Spacer(),
               TextButton(
                 onPressed: () {
-                  // Navegar a página de personal
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BlocProvider(
+                        create: (context) => StaffBloc(_repository)..add(LoadStaffs()),
+                        child: const StaffPage(),
+                      ),
+                    ),
+                  );
                 },
                 child: Text(
                   'Ver todos',
