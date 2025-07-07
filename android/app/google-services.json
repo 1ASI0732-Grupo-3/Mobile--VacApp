@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "11488236873",
+    "project_id": "vac-app-mobile-app",
+    "storage_bucket": "vac-app-mobile-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11488236873:android:0409f6a05c9df1b611b698",
+        "android_client_info": {
+          "package_name": "upc.edu.pe.vacapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQivaP-4EQXERsXf-_Uj16jUCdCmnr5j0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
