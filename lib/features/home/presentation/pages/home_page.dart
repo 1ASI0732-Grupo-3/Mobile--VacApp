@@ -10,7 +10,9 @@ import 'package:vacapp/features/home/presentation/widgets/animals_overview_widge
 import 'package:vacapp/features/home/presentation/widgets/alert_stats_card.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Function(int)? onNavigateToTab;
+  
+  const HomePage({super.key, this.onNavigateToTab});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -150,7 +152,9 @@ class _HomePageState extends State<HomePage> {
                     const VaccinesOverviewWidget(),
                     
                     // Widget de establos
-                    const StablesOverviewWidget(),
+                    StablesOverviewWidget(
+                      onNavigateToTab: widget.onNavigateToTab,
+                    ),
                     
                     // Espacio suficiente para evitar superposición con navigation bar
                     const SizedBox(height: 120),

@@ -35,7 +35,11 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     Widget body;
     if (selectedIndex == 0) {
-      body = const HomePage();
+      body = HomePage(onNavigateToTab: (index) {
+        setState(() {
+          selectedIndex = index;
+        });
+      });
     } else if (selectedIndex == 1) {
       body = const AnimalPage();
     } else if (selectedIndex == 2) {

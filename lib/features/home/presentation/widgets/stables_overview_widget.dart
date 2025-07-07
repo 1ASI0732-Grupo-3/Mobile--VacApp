@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vacapp/features/stables/data/repositories/stable_repository.dart';
 import 'package:vacapp/features/stables/data/datasources/stables_service.dart';
 import 'package:vacapp/features/stables/data/models/stable_dto.dart';
-import 'package:vacapp/features/stables/presentation/pages/stable_page.dart';
 import 'package:vacapp/features/animals/data/dataasources/animals_service.dart';
 import 'package:vacapp/core/services/connectivity_service.dart';
 
 class StablesOverviewWidget extends StatefulWidget {
-  const StablesOverviewWidget({super.key});
+  final Function(int)? onNavigateToTab;
+  
+  const StablesOverviewWidget({super.key, this.onNavigateToTab});
 
   @override
   State<StablesOverviewWidget> createState() => _StablesOverviewWidgetState();
@@ -322,11 +324,12 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
               const Spacer(),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const StablePage(),
-                    ),
-                  );
+                  // Cambiar al tab de establos (índice 3) en lugar de navegar
+                  if (widget.onNavigateToTab != null) {
+                    // Agregar haptic feedback para mejor UX
+                    HapticFeedback.selectionClick();
+                    widget.onNavigateToTab!(3);
+                  }
                 },
                 child: Text(
                   'Ver todos',
