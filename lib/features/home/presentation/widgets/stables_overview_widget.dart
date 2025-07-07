@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:vacapp/features/stables/data/repositories/stable_repository.dart';
 import 'package:vacapp/features/stables/data/datasources/stables_service.dart';
 import 'package:vacapp/features/stables/data/models/stable_dto.dart';
+import 'package:vacapp/features/stables/presentation/pages/stable_page.dart';
+import 'package:vacapp/features/animals/data/dataasources/animals_service.dart';
 import 'package:vacapp/core/services/connectivity_service.dart';
 
 class StablesOverviewWidget extends StatefulWidget {
@@ -13,6 +15,7 @@ class StablesOverviewWidget extends StatefulWidget {
 
 class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
   late StableRepository _repository;
+  late AnimalsService _animalsService;
   final ConnectivityService _connectivityService = ConnectivityService();
 
   bool _isLoading = true;
@@ -23,6 +26,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
   int _totalCapacity = 0;
   int _availableSpace = 0;
   List<StableDto> _recentStables = [];
+  Map<int, int> _bovinoCount = {};
 
   // Paleta de colores moderna
   static const Color primary = Color(0xFF00695C);
@@ -33,6 +37,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
   void initState() {
     super.initState();
     _repository = StableRepository(StablesService());
+    _animalsService = AnimalsService();
     _loadStables();
   }
 
@@ -50,26 +55,25 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
       }
 
       final stables = await _repository.getStables();
+      await _loadBovinoCounts(stables);
+      
       if (mounted) {
         // Ordenar por reciente (asumimos que ID más grande = más reciente)
         final sortedStables = List<StableDto>.from(stables)
           ..sort((a, b) => b.id.compareTo(a.id));
         
         int totalCapacity = 0;
-        int availableSpace = 0;
+        int totalOccupied = 0;
         
         for (final stable in stables) {
           totalCapacity += stable.limit;
-          // En un caso real, se calcularía el espacio disponible basado en la ocupación actual
-          // Para este ejemplo, simulamos que hay un 30% de espacio disponible
-          availableSpace += (stable.limit * 0.3).round();
+          totalOccupied += _bovinoCount[stable.id] ?? 0;
         }
         
         setState(() {
-
           _totalStables = stables.length;
           _totalCapacity = totalCapacity;
-          _availableSpace = availableSpace;
+          _availableSpace = totalCapacity - totalOccupied;
           _recentStables = sortedStables.take(3).toList();
           _isLoading = false;
         });
@@ -89,6 +93,26 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadBovinoCounts(List<StableDto> stables) async {
+    Map<int, int> counts = {};
+
+    for (final stable in stables) {
+      try {
+        final animals = await _animalsService.fetchAnimalByStableId(stable.id);
+        counts[stable.id] = animals.length;
+      } catch (e) {
+        print('Error loading animals for stable ${stable.id}');
+        counts[stable.id] = 0;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _bovinoCount = counts;
+      });
     }
   }
 
@@ -298,7 +322,11 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
               const Spacer(),
               TextButton(
                 onPressed: () {
-                  // Navegar a página de establos
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const StablePage(),
+                    ),
+                  );
                 },
                 child: Text(
                   'Ver todos',
@@ -385,21 +413,34 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
   }
 
   Widget _buildStableItem(StableDto stable) {
-    // Calcular ocupación (simulada, en un caso real vendría de la API)
-    final ocupado = stable.limit - (stable.limit * 0.3).round();
-    final porcentaje = ((ocupado / stable.limit) * 100).round();
+    // Obtener datos reales de ocupación
+    final ocupado = _bovinoCount[stable.id] ?? 0;
+    final porcentaje = stable.limit > 0 ? ((ocupado / stable.limit) * 100).round() : 0;
+    final available = stable.limit - ocupado;
+    final isFull = porcentaje >= 100;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isFull ? Colors.red.shade300 : Colors.grey.shade200,
+          width: isFull ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isFull ? Colors.red.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header con información del establo
           Row(
             children: [
               Container(
@@ -416,17 +457,31 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  stable.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade800,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      stable.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Establo ID: ${stable.id}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              // Badge de ocupación
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
@@ -445,6 +500,44 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
             ],
           ),
           const SizedBox(height: 12),
+          
+          // Información de capacidad
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Capacidad',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    '$ocupado / ${stable.limit}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isFull ? Colors.red.shade700 : Colors.black87,
+                    ),
+                  ),
+                  if (isFull) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.warning,
+                      color: Colors.red.shade600,
+                      size: 16,
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          
+          // Barra de progreso
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
@@ -455,6 +548,8 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
             ),
           ),
           const SizedBox(height: 8),
+          
+          // Información adicional
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -466,7 +561,7 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
                 ),
               ),
               Text(
-                'Disponible: ${stable.limit - ocupado}',
+                'Disponible: $available',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade600,
@@ -475,6 +570,41 @@ class _StablesOverviewWidgetState extends State<StablesOverviewWidget> {
               ),
             ],
           ),
+          
+          // Mensaje de estado si está lleno
+          if (isFull) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.red.shade200,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error,
+                    size: 14,
+                    color: Colors.red.shade600,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '¡Establo lleno!',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
