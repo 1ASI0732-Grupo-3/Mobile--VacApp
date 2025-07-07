@@ -40,6 +40,18 @@ class _CreateAnimalPageState extends State<CreateAnimalPage> {
     super.dispose();
   }
 
+  // Función para convertir género de español a inglés
+  String _convertGenderToEnglish(String? spanishGender) {
+    switch (spanishGender) {
+      case 'Macho':
+        return 'Male';
+      case 'Hembra':
+        return 'Female';
+      default:
+        return '';
+    }
+  }
+
   Future<void> _showImageOptions() async {
     await showCupertinoModalPopup(
       context: context,
@@ -106,8 +118,8 @@ Future<void> _saveAnimal() async {
     return;
   }
   if (_selectedGender == null ||
-      (_selectedGender != 'Male' && _selectedGender != 'Female')) {
-    _showErrorDialog('Selecciona un género válido: Male o Female.');
+      (_selectedGender != 'Macho' && _selectedGender != 'Hembra')) {
+    _showErrorDialog('Selecciona un género válido: Macho o Hembra.');
     return;
   }
   if (_selectedBreed == null || _selectedBreed!.isEmpty || _selectedBreed == 'Seleccionar raza') {
@@ -131,7 +143,7 @@ Future<void> _saveAnimal() async {
     final animal = AnimalDto(
       id: 0,
       name: _nameController.text.trim(),
-      gender: _selectedGender!,
+      gender: _convertGenderToEnglish(_selectedGender), // Convierte de español a inglés
       birthDate: _birthDate!.toIso8601String(),
       breed: _selectedBreed ?? '',
       location: _selectedLocation ?? '',
