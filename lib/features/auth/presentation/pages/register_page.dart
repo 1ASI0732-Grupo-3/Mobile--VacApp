@@ -395,7 +395,7 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
                     tag: 'register_image',
                     child: Image.asset(
                       'assets/images/register.png',
-                      height: 180,
+                      height: 140, // Más pequeño para dar espacio
                     ),
                   ),
                 ),
@@ -403,30 +403,25 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
             ),
           ),
 
-          // Contenedor inferior - con animación desde abajo
+          // Contenedor inferior - expandido con scroll interno
           Expanded(
             child: SlideTransition(
               position: _slideAnimation,
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  children: [
-                    // Sección fija (Título, campos, botón)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                       child: BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
                           if (state is SuccessRegisterState) {
-                            // NO guardar el token aquí para registro
-                            // El usuario debe hacer login después del registro
                             _showSuccessDialog();
                           }
                           if (state is FailureState) {
@@ -552,14 +547,12 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
                                   onPressed: (state is LoadingAuthState || !_agreeToTerms)
                                       ? null
                                       : () {
-                                          // Validar formulario antes de enviarlo
                                           final validationError = _validateForm();
                                           if (validationError != null) {
                                             _showErrorDialog(validationError);
                                             return;
                                           }
 
-                                          // Si la validación pasa, enviar el formulario
                                           BlocProvider.of<AuthBloc>(context).add(
                                             SignUpEvent(
                                               username: _nameController.text.trim(),
@@ -582,55 +575,44 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
                                         ),
                                 ),
                               ),
+                              const SizedBox(height: 30),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "¿Ya tienes una cuenta? ",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                                      );
+                                    },
+                                    child: const Text(
+                                      "Iniciar Sesión",
+                                      style: TextStyle(
+                                        color: Color(0xFF00695C),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Padding bottom para SafeArea
+                              SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
                             ],
                           );
                         },
                       ),
                     ),
-
-                    // Scroll para dispositivos con poco espacio o teclado
-                    Expanded(
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: Container(), // Placeholder para mantener el scroll funcional
-                      ),
-                    ),
-
-                    // Texto fijo al fondo
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "¿Ya tienes una cuenta? ",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const LoginPage()),
-                              );
-                            },
-                            child: const Text(
-                              "Iniciar Sesión",
-                              style: TextStyle(
-                                color: Color(0xFF00695C),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
                 ),
               ),
             ),

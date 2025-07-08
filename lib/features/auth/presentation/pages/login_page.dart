@@ -80,203 +80,204 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF00695C),
+      resizeToAvoidBottomInset: true,
       body: Column(
         children: [
           // Parte superior con logo - con animación de fade
-          Expanded(
-            flex: 2,
-            child: SafeArea(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Hero(
-                        tag: 'login_image',
-                        child: Image.asset(
-                          'assets/images/login.png',
-                          height: 200,
-                          fit: BoxFit.contain,
-                        ),
+          SafeArea(
+            bottom: false,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Hero(
+                      tag: 'login_image',
+                      child: Image.asset(
+                        'assets/images/login.png',
+                        height: 160, // Más pequeño para dar espacio
+                        fit: BoxFit.contain,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Contenedor blanco con formulario - expandido con scroll interno
+          Expanded(
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                    child: BlocConsumer<AuthBloc, AuthState>(
+                      listener: (context, state) {
+                        if (state is SuccessLoginState) {
+                          _saveToken(state.user.token, state.user.username);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const MainView()),
+                          );
+                        }
+                        if (state is FailureState) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(state.errorMessage),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        return FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 20),
+                              const Text(
+                                "¡Bienvenido de nuevo!",
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF00695C),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                "Ingresa tus credenciales para continuar",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+
+                              _inputField(
+                                controller: _userOrEmailController,
+                                hint: "Usuario o Email",
+                                icon: Icons.person_outline,
+                                obscure: false,
+                                isPassword: false,
+                              ),
+                              const SizedBox(height: 20),
+
+                              _inputField(
+                                controller: _passwordController,
+                                hint: "Contraseña",
+                                icon: Icons.lock_outline,
+                                obscure: !_isVisible,
+                                isPassword: true,
+                              ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    // Implementar recuperación
+                                  },
+                                  child: const Text(
+                                    "¿Olvidaste tu contraseña?",
+                                    style: TextStyle(
+                                      color: Color(0xFF00695C),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF00695C),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: state is LoadingAuthState
+                                      ? null
+                                      : () {
+                                          BlocProvider.of<AuthBloc>(context).add(
+                                            LoginEvent(
+                                              usernameOrEmail: _userOrEmailController.text.trim(),
+                                              password: _passwordController.text.trim(),
+                                            ),
+                                          );
+                                        },
+                                  child: state is LoadingAuthState
+                                      ? const CircularProgressIndicator(color: Colors.white)
+                                      : const Text(
+                                          "Iniciar Sesión",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "¿No tienes cuenta? ",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const RegisterPage()),
+                                      );
+                                    },
+                                    child: const Text(
+                                      "Regístrate",
+                                      style: TextStyle(
+                                        color: Color(0xFF00695C),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Padding bottom para SafeArea
+                              SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-
-          // Contenedor blanco con formulario - con animación desde abajo
-          Expanded(
-            flex: 3,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-              ),
-              child: BlocConsumer<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is SuccessLoginState) {
-                    _saveToken(state.user.token, state.user.username);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MainView()),
-                    );
-                  }
-                  if (state is FailureState) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.errorMessage),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  return FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SingleChildScrollView(
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
-                        const Text(
-                          "¡Bienvenido de nuevo!",
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF00695C),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "Ingresa tus credenciales para continuar",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-
-                        _inputField(
-                          controller: _userOrEmailController,
-                          hint: "Usuario o Email",
-                          icon: Icons.person_outline,
-                          obscure: false,
-                          isPassword: false,
-                        ),
-                        const SizedBox(height: 20),
-
-                        _inputField(
-                          controller: _passwordController,
-                          hint: "Contraseña",
-                          icon: Icons.lock_outline,
-                          obscure: !_isVisible,
-                          isPassword: true,
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              // Implementar recuperación
-                            },
-                            child: const Text(
-                              "¿Olvidaste tu contraseña?",
-                              style: TextStyle(
-                                color: Color(0xFF00695C),
-                                fontWeight: FontWeight.w500,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF00695C),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 0,
-                            ),
-                            onPressed: state is LoadingAuthState
-                                ? null
-                                : () {
-                                    BlocProvider.of<AuthBloc>(context).add(
-                                      LoginEvent(
-                                        usernameOrEmail: _userOrEmailController.text.trim(),
-                                        password: _passwordController.text.trim(),
-                                      ),
-                                    );
-                                  },
-                            child: state is LoadingAuthState
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text(
-                                    "Iniciar Sesión",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "¿No tienes cuenta? ",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const RegisterPage()),
-                                );
-                              },
-                              child: const Text(
-                                "Regístrate",
-                                style: TextStyle(
-                                  color: Color(0xFF00695C),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Agregar padding inferior para el SafeArea
-                        SizedBox(height: MediaQuery.of(context).padding.bottom),
-                      ],
-                    ),
-                    )
-                  );
-                },
-              ),
-            ),
-          ),
-            ),
         ],
       ),
     );
