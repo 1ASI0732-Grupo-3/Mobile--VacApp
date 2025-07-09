@@ -48,13 +48,35 @@ class _AnimalPageState extends State<AnimalPage> {
     
     // Listener para controlar la visibilidad del título con animación ultra suave
     _scrollController.addListener(() {
-      const threshold = 120.0; // Píxeles de scroll para ocultar el título (más gradual)
-      final shouldShowTitle = _scrollController.offset <= threshold;
+      // Verificar si el scroll controller está disponible y válido
+      if (!_scrollController.hasClients) return;
+      
+      final shouldShowTitle = _shouldShowTitle();
       
       if (shouldShowTitle != _showTitle) {
         setState(() {
           _showTitle = shouldShowTitle;
         });
+      }
+      
+      // Prevenir comportamiento anómalo al llegar al final
+      if (_scrollController.position.atEdge && _scrollController.position.pixels != 0) {
+        // Si está en el final, asegurar que no salte hacia arriba
+        final currentOffset = _scrollController.offset;
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        
+        // Si el offset actual es mayor que el máximo, corregir suavemente
+        if (currentOffset > maxScroll) {
+          Future.delayed(const Duration(milliseconds: 50), () {
+            if (_scrollController.hasClients) {
+              _scrollController.animateTo(
+                maxScroll,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+              );
+            }
+          });
+        }
       }
     });
   }
@@ -97,6 +119,24 @@ class _AnimalPageState extends State<AnimalPage> {
                genderInSpanish.contains(query);
       }).toList();
     });
+    
+    // Resetear scroll position cuando se cambie el filtro
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+    
+    // Asegurar que el título se muestre correctamente basado en la nueva cantidad filtrada
+    final shouldShowTitle = _shouldShowTitle();
+    
+    if (shouldShowTitle != _showTitle) {
+      setState(() {
+        _showTitle = shouldShowTitle;
+      });
+    }
   }
 
   // Función para mostrar el género en español
@@ -169,6 +209,39 @@ class _AnimalPageState extends State<AnimalPage> {
     });
     // Recargar vacunas cuando se actualicen los animales
     _loadVaccinesForAllAnimals();
+    
+    // Asegurar que el scroll position esté dentro de límites válidos
+    _ensureScrollPositionValid();
+    
+    // Asegurar que el título se muestre correctamente basado en la nueva cantidad de animales
+    final shouldShowTitle = _shouldShowTitle();
+    
+    if (shouldShowTitle != _showTitle) {
+      setState(() {
+        _showTitle = shouldShowTitle;
+      });
+    }
+  }
+  
+  // Método para asegurar que la posición de scroll sea válida
+  void _ensureScrollPositionValid() {
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentOffset = _scrollController.offset;
+      
+      // Si el offset actual es mayor que el máximo posible, ajustar suavemente
+      if (currentOffset > maxScroll) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              maxScroll,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+      }
+    }
   }
 
   Future<void> _loadVaccinesForAllAnimals() async {
@@ -1268,6 +1341,23 @@ class _AnimalPageState extends State<AnimalPage> {
     );
   }
 
+  // Método auxiliar para determinar si el título debe mostrarse
+  bool _shouldShowTitle() {
+    // Si hay 3 o menos bovinos, siempre mostrar el título
+    if (_filteredAnimals.length <= 3) {
+      return true;
+    }
+    
+    // Si hay más de 3 bovinos, verificar la posición de scroll
+    if (_scrollController.hasClients) {
+      const threshold = 120.0;
+      return _scrollController.offset <= threshold;
+    }
+    
+    // Por defecto, mostrar el título
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Colores institucionales modernos
@@ -1581,7 +1671,8 @@ class _AnimalPageState extends State<AnimalPage> {
                   Expanded(
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120), // Padding inferior para evitar superposición con barra nav
+                      physics: const ClampingScrollPhysics(), // Prevenir bounce y comportamiento anómalo
                       itemCount: _filteredAnimals.length,
                       itemBuilder: (context, index) {
                         final animal = _filteredAnimals[index];

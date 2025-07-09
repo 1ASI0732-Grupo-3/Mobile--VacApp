@@ -125,7 +125,9 @@ class AnimalRepository {
     try {
       if (_connectivityService.isConnected) {
         await _animalsService.deleteAnimal(id);
+        // Refrescar la lista local después de eliminar
         await getAnimals();
+        print('Animal eliminado exitosamente del servidor');
       } else {
         // Sin conexión, marcar para eliminación offline
         // Esto requeriría una implementación más compleja en el offline service

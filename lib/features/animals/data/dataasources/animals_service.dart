@@ -145,10 +145,23 @@ class AnimalsService {
     final Uri uri = Uri.parse('${Endpoints.animal}/$id');
     final response = await http.delete(uri, headers: headers);
 
-    if (response.statusCode != HttpStatus.noContent) {
-      throw Exception(jsonDecode(response.body)['message'] ?? 'Error al eliminar el animal');
+    // Verificar múltiples códigos de éxito para eliminación
+    if (response.statusCode != HttpStatus.noContent && 
+        response.statusCode != HttpStatus.ok && 
+        response.statusCode != HttpStatus.accepted) {
+      
+      String errorMessage = 'Error al eliminar el animal';
+      try {
+        final responseBody = jsonDecode(response.body);
+        errorMessage = responseBody['message'] ?? errorMessage;
+      } catch (e) {
+        // Si no se puede decodificar el JSON, usar el mensaje por defecto
+        errorMessage = 'Error al eliminar el animal (Status: ${response.statusCode})';
+      }
+      
+      throw Exception(errorMessage);
     }
-    print('✅ Animal $id deleted');
+    print('✅ Animal $id deleted successfully');
   }
 
   Future<List<AnimalDto>> fetchAnimalByStableId(int stableId) async {
