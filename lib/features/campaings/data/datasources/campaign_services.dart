@@ -12,7 +12,7 @@ class CampaignServices {
       final token = await TokenService.instance.getToken();
       
       final response = await http.get(
-        Uri.parse('${Endpoints.campaign}/all-campaigns'),
+        Uri.parse('${Endpoints.campaign}'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
